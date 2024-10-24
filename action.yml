@@ -23,10 +23,6 @@ inputs:
   branch:
     description: 'The branch to check for the latest version tag.'
     required: true
-  verbose:
-    description: 'Print verbose logs for debugging purposes.'
-    required: false
-    default: 'false'
   fails-on-error:
     description: 'Set to "true" to fail the action if validation errors are found.'
     required: false
@@ -73,7 +69,6 @@ runs:
         INPUT_GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
         INPUT_VERSION_TAG: ${{ inputs.version-tag }}
         INPUT_BRANCH: ${{ inputs.branch }}
-        INPUT_VERBOSE: ${{ inputs.verbose }}
         INPUT_FAILS_ON_ERROR: ${{ inputs.fails-on-error }}
       run: |
         source .venv/bin/activate
