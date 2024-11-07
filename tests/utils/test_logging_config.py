@@ -17,8 +17,8 @@
 import logging
 import os
 import sys
-from logging import StreamHandler
 
+from logging import StreamHandler
 from version_tag_check.utils.logging_config import setup_logging
 
 

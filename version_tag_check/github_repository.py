@@ -17,10 +17,14 @@
 """
 This module contains the GitHubRepository class that is used to interact with the GitHub API.
 """
+
+import logging
 import requests
 
 from requests import RequestException
 from version_tag_check.version import Version
+
+logger = logging.getLogger(__name__)
 
 
 # pylint: disable=too-few-public-methods
