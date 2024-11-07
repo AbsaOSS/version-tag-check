@@ -17,16 +17,18 @@
 """
 This module contains the GitHubRepository class that is used to interact with the GitHub API.
 """
-
 import requests
 
+from requests import RequestException
 from version_tag_check.version import Version
 
 
+# pylint: disable=too-few-public-methods
 class GitHubRepository:
     """
     A class that represents a GitHub repository and provides methods to interact
     """
+
     def __init__(self, owner: str, repo: str, token: str) -> None:
         """
         Initialize the GitHubRepository with the owner, repo and token.
@@ -39,10 +41,7 @@ class GitHubRepository:
         self.owner = owner
         self.repo = repo
         self.token = token
-        self.headers = {
-            'Authorization': f'Bearer {self.token}',
-            'Accept': 'application/vnd.github.v3+json'
-        }
+        self.headers = {"Authorization": f"Bearer {self.token}", "Accept": "application/vnd.github.v3+json"}
 
     def get_all_tags(self) -> list:
         """
@@ -55,17 +54,18 @@ class GitHubRepository:
         per_page = 100
         while True:
             response = requests.get(
-                f'https://api.github.com/repos/{self.owner}/{self.repo}/tags',
+                f"https://api.github.com/repos/{self.owner}/{self.repo}/tags",
                 headers=self.headers,
-                params={'per_page': per_page, 'page': page}
+                params={"per_page": per_page, "page": page},
+                timeout=5,
             )
             if response.status_code != 200:
-                raise Exception(f'Failed to fetch tags: {response.status_code} {response.text}')
+                raise RequestException(f"Failed to fetch tags: {response.status_code} {response.text}")
             page_tags = response.json()
             if not page_tags:
                 break
             for tag_info in page_tags:
-                tag_name = tag_info['name']
+                tag_name = tag_info["name"]
                 try:
                     version = Version(tag_name)
                     tags.append(version)

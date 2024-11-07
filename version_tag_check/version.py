@@ -21,12 +21,14 @@ This module contains the main script for the Version Tag Check GH Action.
 import re
 from functools import total_ordering
 
+
 @total_ordering
 class Version:
     """
     Class to represent a version and compare it to other versions.
     """
-    VERSION_REGEX = r'^v(\d+)\.(\d+)\.(\d+)$'
+
+    VERSION_REGEX = r"^v(\d+)\.(\d+)\.(\d+)$"
 
     def __init__(self, version_str: str) -> None:
         """
@@ -49,7 +51,7 @@ class Version:
         """
         match = re.match(self.VERSION_REGEX, self.version_str)
         if not match:
-            raise ValueError(f'Invalid version format: {self.version_str}')
+            raise ValueError(f"Invalid version format: {self.version_str}")
         self.major, self.minor, self.patch = map(int, match.groups())
 
     def is_valid_format(self) -> bool:

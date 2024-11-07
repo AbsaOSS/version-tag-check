@@ -29,21 +29,25 @@ logger = logging.getLogger(__name__)
 
 
 class VersionTagCheckAction:
+    """
+    Class to handle the Version Tag Check GitHub Action
+    """
+
     def __init__(self) -> None:
         """
         Initialize the action with the required inputs.
 
         @return: None
         """
-        self.github_token = os.environ.get('INPUT_GITHUB_TOKEN')
-        self.version_tag_str = os.environ.get('INPUT_VERSION_TAG')
-        self.branch = os.environ.get('INPUT_BRANCH')
-        self.fails_on_error = os.environ.get('INPUT_FAILS_ON_ERROR', 'true').lower() == 'true'
-        self.github_repository = os.environ.get('INPUT_GITHUB_REPOSITORY')
+        self.github_token = os.environ.get("INPUT_GITHUB_TOKEN")
+        self.version_tag_str = os.environ.get("INPUT_VERSION_TAG")
+        self.branch = os.environ.get("INPUT_BRANCH")
+        self.fails_on_error = os.environ.get("INPUT_FAILS_ON_ERROR", "true").lower() == "true"
+        self.github_repository = os.environ.get("INPUT_GITHUB_REPOSITORY")
 
         self.__validate_inputs()
 
-        self.owner, self.repo = self.github_repository.split('/')
+        self.owner, self.repo = self.github_repository.split("/")
 
     def run(self) -> None:
         """
@@ -62,12 +66,14 @@ class VersionTagCheckAction:
 
             validator = VersionValidator(new_version, existing_versions)
             if validator.is_valid_increment():
-                self.write_output('true')
-                logger.info('New tag is valid.')
+                self.write_output("true")
+                logger.info("New tag is valid.")
                 sys.exit(0)
             else:
                 latest_version = validator.get_latest_version()
-                logger.error(f'New tag {self.version_tag_str} is not one version higher than the latest tag {latest_version}.')
+                logger.error(
+                    "New tag %s is not one version higher than the latest tag %s.", self.version_tag_str, latest_version
+                )
                 self.handle_failure()
 
         except ValueError as e:
@@ -81,12 +87,12 @@ class VersionTagCheckAction:
         @param valid_value: The value to write to the output file.
         @return: None
         """
-        output_file = os.environ.get('GITHUB_OUTPUT')
+        output_file = os.environ.get("GITHUB_OUTPUT")
         if output_file:
-            with open(output_file, 'a') as fh:
-                print(f'valid={valid_value}', file=fh)
+            with open(output_file, "a", encoding="utf-8") as fh:
+                print(f"valid={valid_value}", file=fh)
         else:
-            logger.error('GITHUB_OUTPUT is not set.')
+            logger.error("GITHUB_OUTPUT is not set.")
 
     def handle_failure(self) -> None:
         """
@@ -94,7 +100,7 @@ class VersionTagCheckAction:
 
         @return: None
         """
-        self.write_output('false')
+        self.write_output("false")
         if self.fails_on_error:
             sys.exit(1)
         else:
@@ -107,17 +113,17 @@ class VersionTagCheckAction:
         @return: None
         """
         if not self.github_token:
-            logger.error('Failure: GITHUB_TOKEN is not set.')
+            logger.error("Failure: GITHUB_TOKEN is not set.")
             sys.exit(1)
 
         if not self.github_repository:
-            logger.error('Failure: GITHUB_REPOSITORY is not set.')
+            logger.error("Failure: GITHUB_REPOSITORY is not set.")
             sys.exit(1)
 
         if len(self.version_tag_str) == 0:
-            logger.error('Failure: VERSION_TAG is not set.')
+            logger.error("Failure: VERSION_TAG is not set.")
             sys.exit(1)
 
         if len(self.branch) == 0:
-            logger.error('Failure: BRANCH is not set.')
+            logger.error("Failure: BRANCH is not set.")
             sys.exit(1)

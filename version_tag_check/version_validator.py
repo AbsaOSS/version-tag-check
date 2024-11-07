@@ -27,6 +27,7 @@ class VersionValidator:
     """
     Class to validate the new version against the existing versions.
     """
+
     def __init__(self, new_version: Version, existing_versions: list) -> None:
         """
         Initialize the VersionValidator with the new version and existing versions.
@@ -65,11 +66,9 @@ class VersionValidator:
         if nv.major == lv.major:
             if nv.minor == lv.minor:
                 return nv.patch == lv.patch + 1
-            elif nv.minor == lv.minor + 1:
+            if nv.minor == lv.minor + 1:
                 return nv.patch == 0
-            else:
-                return False
         elif nv.major == lv.major + 1:
             return nv.minor == 0 and nv.patch == 0
-        else:
-            return False
+
+        return False

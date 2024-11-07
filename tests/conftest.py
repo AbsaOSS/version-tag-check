@@ -14,21 +14,10 @@
 # limitations under the License.
 #
 
-"""
-This module contains the main script for the Version Tag Check GH Action.
-"""
-
-import logging
-
-from version_tag_check.utils.logging_config import setup_logging
-from version_tag_check.version_tag_check_action import VersionTagCheckAction
+import pytest
 
 
-if __name__ == "__main__":
-    setup_logging()
-    logger = logging.getLogger(__name__)
-
-    logger.info("Starting Living Documentation generation.")
-
-    action = VersionTagCheckAction()
-    action.run()
+@pytest.fixture
+def mock_logging_setup(mocker):
+    mock_log_config = mocker.patch("logging.basicConfig")
+    yield mock_log_config
