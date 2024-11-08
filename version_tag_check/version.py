@@ -108,10 +108,10 @@ class Version:
         @param other: The other Version to compare to
         @return: True if the Versions are equal, False otherwise
         """
-        if not self.__valid:
+        if other is None:
             return False
 
-        if other is None:
+        if not self.__valid or not other.__valid:
             return False
 
         return (self.__major, self.__minor, self.__patch) == (other.__major, other.__minor, other.__patch)
@@ -123,10 +123,10 @@ class Version:
         @param other: The other Version to compare to
         @return: True if the Version is less than the other Version, False otherwise
         """
-        if self.__valid:
+        if other is None:
             return False
 
-        if other is None:
+        if not self.__valid or not other.__valid:
             return False
 
         return (self.__major, self.__minor, self.__patch) < (other.__major, other.__minor, other.__patch)
@@ -138,10 +138,10 @@ class Version:
         @param other: The other Version to compare to
         @return: True if the Version is greater than the other Version, False otherwise
         """
-        if self.__valid:
+        if other is None:
             return False
 
-        if other is None:
+        if not self.__valid or not other.__valid:
             return False
 
         return (self.__major, self.__minor, self.__patch) > (other.__major, other.__minor, other.__patch)

@@ -42,8 +42,24 @@ def test_equality_false():
     v1 = Version("v1.2.3")
     v2 = Version("v1.2.4")
 
-    assert v1 != v2
+    assert not v1 == v2
 
+def test_equality_not_valid():
+    v1 = Version("x1.2.3")
+    v2 = Version("v1.2.4")
+
+    assert not v1 == v2
+
+def test_equality_other_not_valid():
+    v1 = Version("v1.2.3")
+    v2 = Version("x1.2.4")
+
+    assert not v1 == v2
+
+def test_equality_other_is_none():
+    v1 = Version("v1.2.3")
+
+    assert not v1 == None
 
 # __lt__
 
@@ -58,6 +74,55 @@ def test_less_than_false():
     v2 = Version("v1.9.9")
 
     assert not v1 < v2
+
+def test_less_than_not_valid():
+    v1 = Version("v2.0.0")
+    v2 = Version("x1.9.9")
+
+    assert not v2 < v1
+
+def test_less_than_other_not_valid():
+    v1 = Version("x2.0.0")
+    v2 = Version("v1.9.9")
+
+    assert not v2 < v1
+
+def test_less_than_other_is_none():
+    v = Version("v1.9.9")
+
+    assert not v < None
+
+
+# __gt__
+
+def test_greater_than_true():
+    v1 = Version("v1.2.3")
+    v2 = Version("v1.2.4")
+
+    assert v2 > v1
+
+def test_greater_than_false():
+    v1 = Version("v2.0.0")
+    v2 = Version("v1.9.9")
+
+    assert not v2 > v1
+
+def test_greater_than_not_valid():
+    v1 = Version("v2.0.0")
+    v2 = Version("x1.9.9")
+
+    assert not v1 > v2
+
+def test_greater_than_other_not_valid():
+    v1 = Version("x2.0.0")
+    v2 = Version("v1.9.9")
+
+    assert not v1 > v2
+
+def test_greater_than_other_is_none():
+    v = Version("v1.9.9")
+
+    assert not v > None
 
 
 # __str__
