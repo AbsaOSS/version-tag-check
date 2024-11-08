@@ -75,6 +75,21 @@ See the default action step definition:
     fails-on-error: "false"
   ```
 
+### Supported Version Tags Formats
+- `1.0.0`
+- `v1.0.0`
+
+### Support Version Weight Comparison
+- `v1.0.0` < `v1.0.1` < `v1.1.0` < `v2.0.0`
+
+### Planned Support of Version Tags Formats With Qualifiers
+- `v1.0.0-SNAPSHOT`, `v1.0.0-RC[0..9]`, `v1.0.0-RELEASE`, `v1.0.0-HF[0..9]`
+- `v1.0.0-ALPHA`, `v1.0.0-BETA`
+
+### Planned Support of Version Weight Comparison With Qualifiers
+- `v1.0.0-SNAPSHOT` < `v1.0.0-RC1` < `v1.0.0-RC2` < `v1.0.0-RELEASE` < `v1.0.0-HF1` < `v1.0.0-HF2`
+- `v1.0.0-ALPHA` < `v1.0.0-BETA`
+
 ## Running Static Code Analysis
 
 This project uses Pylint tool for static code analysis. Pylint analyses your code without actually running it. It checks for errors, enforces, coding standards, looks for code smells etc.
