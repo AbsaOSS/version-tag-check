@@ -73,7 +73,5 @@ class NewVersionValidator:
         elif nv.major == lv.major + 1:
             return nv.minor == 0 and nv.patch == 0
 
-        logger.error(
-            "New tag %s is not one version higher than the latest tag %s.", self.__new_version, latest_version
-        )
+        logger.error("New tag %s is not one version higher than the latest tag %s.", self.__new_version, latest_version)
         return False
