@@ -24,6 +24,7 @@ from version_tag_check.version import Version
 
 logger = logging.getLogger(__name__)
 
+
 # pylint: disable=too-few-public-methods
 class NewVersionValidator:
     """
