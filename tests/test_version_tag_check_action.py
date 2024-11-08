@@ -74,7 +74,8 @@ def test_run_successful(mocker, tmp_path):
     }
     # Update os.environ with the test environment variables
     os.environ.update(env_vars)
-    os.remove("output.txt")
+    if os.path.exists("output.txt"):
+        os.remove("output.txt")
 
     # Mock sys.exit to prevent the test from exiting
     mock_exit = mocker.patch("sys.exit")
@@ -115,7 +116,8 @@ def test_run_invalid_version_format(mocker, tmp_path, caplog):
         "INPUT_GITHUB_REPOSITORY": "owner/repo",
     }
     os.environ.update(env_vars)
-    os.remove("output.txt")
+    if os.path.exists("output.txt"):
+        os.remove("output.txt")
 
     # Mock sys.exit
     def mock_exit(code):
@@ -154,7 +156,8 @@ def test_run_invalid_version_increment(mocker, tmp_path):
         "INPUT_GITHUB_REPOSITORY": "owner/repo",
     }
     os.environ.update(env_vars)
-    os.remove("output.txt")
+    if os.path.exists("output.txt"):
+        os.remove("output.txt")
 
     # Mock sys.exit
     mock_exit = mocker.patch("sys.exit")
