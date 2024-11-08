@@ -111,10 +111,10 @@ class Version:
         if other is None:
             return False
 
-        if not self.__valid or not other.__valid:
+        if not self.is_valid_format() or not other.is_valid_format():
             return False
 
-        return (self.__major, self.__minor, self.__patch) == (other.__major, other.__minor, other.__patch)
+        return (self.major, self.minor, self.patch) == (other.major, other.minor, other.patch)
 
     def __lt__(self, other) -> Optional[bool]:
         """
@@ -126,10 +126,10 @@ class Version:
         if other is None:
             return False
 
-        if not self.__valid or not other.__valid:
+        if not self.is_valid_format() or not other.is_valid_format():
             return False
 
-        return (self.__major, self.__minor, self.__patch) < (other.__major, other.__minor, other.__patch)
+        return (self.major, self.minor, self.patch) < (other.major, other.minor, other.patch)
 
     def __gt__(self, other):
         """
@@ -141,10 +141,10 @@ class Version:
         if other is None:
             return False
 
-        if not self.__valid or not other.__valid:
+        if not self.is_valid_format() or not other.is_valid_format():
             return False
 
-        return (self.__major, self.__minor, self.__patch) > (other.__major, other.__minor, other.__patch)
+        return (self.major, self.minor, self.patch) > (other.major, other.minor, other.patch)
 
     def __str__(self) -> Optional[str]:
         """
