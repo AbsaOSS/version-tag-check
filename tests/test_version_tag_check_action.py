@@ -95,15 +95,14 @@ def test_run_successful(mocker, tmp_path):
     mock_validator_instance = mock_validator_class.return_value
     mock_validator_instance.is_valid_increment.return_value = True
 
+    # Mock the output writing method
+    mock_output = mocker.patch("version_tag_check.version_tag_check_action.VersionTagCheckAction.write_output")
+
     # Run the action
     action = VersionTagCheckAction()
     action.run()
 
-    # Assert that 'valid=true' was written to the output file
-    output_file = Path("output.txt")
-    assert output_file.read_text() == "valid=true\n"
-
-    # Assert that sys.exit was called with 0
+    mock_output.assert_called_once_with("true")
     mock_exit.assert_called_once_with(0)
 
 def test_run_invalid_version_format(mocker, tmp_path, caplog):
@@ -130,6 +129,9 @@ def test_run_invalid_version_format(mocker, tmp_path, caplog):
     mock_version_instance = mock_version_class.return_value
     mock_version_instance.is_valid_format.return_value = False  # Simulate invalid format
 
+    # Mock the output writing method
+    mock_output = mocker.patch("version_tag_check.version_tag_check_action.VersionTagCheckAction.write_output")
+
     # Run the action
     caplog.set_level(logging.ERROR)
     action = VersionTagCheckAction()
@@ -139,11 +141,7 @@ def test_run_invalid_version_format(mocker, tmp_path, caplog):
     # Assert that sys.exit was called with exit code 1
     assert e.value.code == 1
 
-    # Assert that 'valid=false' was written to the output file
-    output_file = Path("output.txt")
-    assert output_file.read_text() == "valid=false\n"
-
-    # Assert that an error was logged
+    mock_output.assert_called_once_with("false")
     assert 'Tag does not match the required format' in caplog.text
 
 def test_run_invalid_version_increment(mocker, tmp_path):
@@ -177,15 +175,14 @@ def test_run_invalid_version_increment(mocker, tmp_path):
     mock_validator_instance = mock_validator_class.return_value
     mock_validator_instance.is_valid_increment.return_value = False
 
+    # Mock the output writing method
+    mock_output = mocker.patch("version_tag_check.version_tag_check_action.VersionTagCheckAction.write_output")
+
     # Run the action
     action = VersionTagCheckAction()
     action.run()
 
-    # Assert that 'valid=false' was written to the output file
-    output_file = Path("output.txt")
-    assert output_file.read_text() == "valid=false\n"
-
-    # Assert that sys.exit was called with 1
+    mock_output.assert_called_once_with("false")
     mock_exit.assert_called_once_with(1)
 
 
