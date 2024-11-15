@@ -256,4 +256,3 @@ If you need help with using or contributing to Generate Release Notes Action, or
 
 - **Issue Tracker**: For technical issues or feature requests, use the [GitHub Issues page](https://github.com/AbsaOSS/version-tag-check/issues).
 - **Discussion Forum**: For general questions and discussions, join our [GitHub Discussions forum](https://github.com/AbsaOSS/version-tag-check/discussions).
-
