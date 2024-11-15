@@ -28,7 +28,7 @@ if __name__ == "__main__":
     setup_logging()
     logger = logging.getLogger(__name__)
 
-    logger.info("Starting Living Documentation generation.")
+    logger.info("Starting Version Tag Check.")
 
     action = VersionTagCheckAction()
     action.run()
