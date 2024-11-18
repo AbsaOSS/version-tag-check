@@ -61,6 +61,7 @@ def test_equality_other_is_none():
 
     assert not v1 == None
 
+
 # __lt__
 
 def test_less_than_true():
