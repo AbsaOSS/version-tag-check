@@ -63,6 +63,10 @@ This action is designed to help maintainers and contributors ensure that version
 See the default action step definition:
 
 ```yaml
+- uses: actions/setup-python@v5.1.1
+  with:
+    python-version: '3.11'
+
 - name: Version Tag Check
   id: version_tag_check
   uses: AbsaOSS/version-tag-check@v0.1.0
@@ -73,7 +77,7 @@ See the default action step definition:
     version-tag: "v0.1.0"
     branch: "master"
     fails-on-error: "false"
-  ```
+```
 
 ### Supported Version Tags Formats
 - `1.0.0`
@@ -101,24 +105,20 @@ Pylint displays a global evaluation score for the code, rated out of a maximum s
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-
-# run your commands
-
-deactivate
 ```
 
 This command will also install a Pylint tool, since it is listed in the project requirements.
 
 ### Run Pylint
 Run Pylint on all files that are currently tracked by Git in the project.
-```
+```shell
 pylint $(git ls-files '*.py')
 ```
 
 To run Pylint on a specific file, follow the pattern `pylint <path_to_file>/<name_of_file>.py`.
 
 Example:
-```
+```shell
 pylint ./version_tag_check/version_tag_check_action.py
 ``` 
 
@@ -158,7 +158,7 @@ black ./version_tag_check/version_tag_check_action.py
 
 ### Expected Output
 This is the console expected output example after running the tool:
-```
+```shell
 All done! ✨ 🍰 ✨
 1 file reformatted.
 ```
@@ -167,7 +167,7 @@ All done! ✨ 🍰 ✨
 
 Unit tests are written using pytest. To run the tests, use the following command:
 
-```
+```shell
 pytest tests/
 ```
 
@@ -177,16 +177,16 @@ This will execute all tests located in the tests directory.
 
 Code coverage is collected using pytest-cov coverage tool. To run the tests and collect coverage information, use the following command:
 
-```
-pytest --cov=. --cov-report=html tests/
+```shell
+pytest --cov=. -v tests/ --cov-fail-under=80
 ```
 
 This will execute all tests located in the tests directory and generate a code coverage report.
 
 See the coverage report on the path:
 
-```
-htmlcov/index.html
+```shell
+open htmlcov/index.html
 ```
 
 ## Run Action Locally

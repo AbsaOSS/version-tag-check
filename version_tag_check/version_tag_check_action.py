@@ -80,9 +80,8 @@ class VersionTagCheckAction:
         @return: None
         """
         output_file = os.environ.get("GITHUB_OUTPUT", default="output.txt")
-        if output_file:
-            with open(output_file, "a", encoding="utf-8") as fh:
-                print(f"valid={valid_value}", file=fh)
+        with open(output_file, "a", encoding="utf-8") as fh:
+            print(f"valid={valid_value}", file=fh)
 
     def handle_failure(self) -> None:
         """
