@@ -158,7 +158,7 @@ black ./version_tag_check/version_tag_check_action.py
 
 ### Expected Output
 This is the console expected output example after running the tool:
-```shell
+```
 All done! ✨ 🍰 ✨
 1 file reformatted.
 ```
