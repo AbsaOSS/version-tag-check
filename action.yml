@@ -17,11 +17,14 @@
 name: 'Version Tag Check'
 description: 'A GH action for validating version tag sequences and ensuring compliance with versioning standards in repositories.'
 inputs:
+  github-repository:
+    description: 'The GitHub repository to check for the latest version tag. Example: "owner/repo".'
+    required: true
   version-tag:
     description: 'The version tag sequence to validate. Example: "v1.2.3".'
     required: true
   branch:
-    description: 'The branch to check for the latest version tag.'
+    description: 'The branch to check for the latest version tag. Example: "master".'
     required: true
   fails-on-error:
     description: 'Set to "true" to fail the action if validation errors are found.'
@@ -67,6 +70,7 @@ runs:
       id: version-tag-check
       env:
         INPUT_GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+        INPUT_GITHUB_REPOSITORY: ${{ inputs.github-repository }}
         INPUT_VERSION_TAG: ${{ inputs.version-tag }}
         INPUT_BRANCH: ${{ inputs.branch }}
         INPUT_FAILS_ON_ERROR: ${{ inputs.fails-on-error }}
