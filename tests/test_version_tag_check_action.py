@@ -17,11 +17,6 @@
 
 import logging
 import os
-import subprocess
-import sys
-import tempfile
-from pathlib import Path
-
 import pytest
 
 from version_tag_check.version_tag_check_action import VersionTagCheckAction

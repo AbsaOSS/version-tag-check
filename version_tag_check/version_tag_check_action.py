@@ -39,11 +39,11 @@ class VersionTagCheckAction:
 
         @return: None
         """
-        self.github_token = os.environ.get("INPUT_GITHUB_TOKEN", default="")
-        self.version_tag_str = os.environ.get("INPUT_VERSION_TAG", default="")
-        self.branch = os.environ.get("INPUT_BRANCH", default="")
-        self.fails_on_error = os.environ.get("INPUT_FAILS_ON_ERROR", "true").lower() == "true"
-        self.github_repository = os.environ.get("INPUT_GITHUB_REPOSITORY", default="")
+        self.github_token: str = os.environ.get("INPUT_GITHUB_TOKEN", default="")
+        self.version_tag_str: str = os.environ.get("INPUT_VERSION_TAG", default="")
+        self.branch: str = os.environ.get("INPUT_BRANCH", default="")
+        self.fails_on_error: bool = os.environ.get("INPUT_FAILS_ON_ERROR", "true").lower() == "true"
+        self.github_repository: str = os.environ.get("INPUT_GITHUB_REPOSITORY", default="")
 
         self.__validate_inputs()
 
@@ -60,8 +60,8 @@ class VersionTagCheckAction:
             logger.error('Tag does not match the required format "v[0-9]+.[0-9]+.[0-9]+"')
             self.handle_failure()
 
-        repository = GitHubRepository(self.owner, self.repo, self.github_token)
-        existing_versions = repository.get_all_tags()
+        repository: GitHubRepository = GitHubRepository(self.owner, self.repo, self.github_token)
+        existing_versions: list[Version] = repository.get_all_tags()
 
         validator = NewVersionValidator(new_version, existing_versions)
         if validator.is_valid_increment():

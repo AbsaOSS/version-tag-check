@@ -31,7 +31,7 @@ class NewVersionValidator:
     Class to validate the new version against the existing versions.
     """
 
-    def __init__(self, new_version: Version, existing_versions: list) -> None:
+    def __init__(self, new_version: Version, existing_versions: list[Version]) -> None:
         """
         Initialize the VersionValidator with the new version and existing versions.
 
@@ -39,8 +39,8 @@ class NewVersionValidator:
         @param existing_versions: A list of existing versions to compare against
         @return: None
         """
-        self.__new_version = new_version
-        self.__existing_versions = existing_versions
+        self.__new_version: Version = new_version
+        self.__existing_versions: list[Version] = existing_versions
 
     def __get_latest_version(self) -> Optional[Version]:
         """
@@ -58,13 +58,13 @@ class NewVersionValidator:
 
         @return: True if the new version is a valid increment, False otherwise
         """
-        latest_version = self.__get_latest_version()
+        latest_version: Optional[Version] = self.__get_latest_version()
         if not latest_version:
             # Any version is valid if no previous versions exist
             return True
 
-        lv = latest_version
-        nv = self.__new_version
+        lv: Optional[Version] = latest_version
+        nv: Version = self.__new_version
 
         if nv.major == lv.major:
             if nv.minor == lv.minor:
