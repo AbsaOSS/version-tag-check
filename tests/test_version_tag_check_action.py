@@ -18,7 +18,6 @@
 import logging
 import os
 import pytest
-from botocore.handlers import VERSION_ID_SUFFIX
 
 from version_tag_check.version import Version
 from version_tag_check.version_tag_check_action import VersionTagCheckAction
