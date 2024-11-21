@@ -70,7 +70,6 @@ class VersionTagCheckAction:
             logger.info("New tag is valid.")
             sys.exit(0)
         else:
-            logger.error("New tag is not valid.")
             sys.exit(1)
 
     def __validate_inputs(self) -> None:

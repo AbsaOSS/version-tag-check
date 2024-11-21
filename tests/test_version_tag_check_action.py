@@ -18,7 +18,9 @@
 import logging
 import os
 import pytest
+from botocore.handlers import VERSION_ID_SUFFIX
 
+from version_tag_check.version import Version
 from version_tag_check.version_tag_check_action import VersionTagCheckAction
 
 
@@ -61,15 +63,14 @@ def test_validate_inputs_missing_variables(monkeypatch, caplog, missing_var, err
 @pytest.mark.parametrize(
     "version_tag, existing_tags",
     [
-        ("v0.0.1", []),                         # New version with no existing tags
-        ("v0.1.0", []),                         # New version with no existing tags
-        ("v1.0.0", []),                         # New version with no existing tags
-        ("v0.0.2", ["v0.0.1"]),                 # Patch increment
-        ("v1.2.0", ["v1.1.0"]),                 # Minor increment
-        ("v2.0.0", ["v1.9.9"]),                 # Major increment
-        ("v2.1.0", ["v2.0.5", "v2.0.0"]),       # New Release serie
-        ("v3.0.1", ["v2.9.9", "v1.0.0"]),       # Increment with Gaps
-        ("v1.5.2", ["v2.0.0", "v1.5.1"]),       # Backport increment
+        ("v0.0.1", []),                                             # New version with no existing tags
+        ("v0.1.0", []),                                             # New version with no existing tags
+        ("v1.0.0", []),                                             # New version with no existing tags
+        ("v0.0.2", [Version("v0.0.1")]),                            # Patch increment
+        ("v1.2.0", [Version("v1.1.0")]),                            # Minor increment
+        ("v2.0.0", [Version("v1.9.9")]),                            # Major increment
+        ("v2.1.0", [Version("v2.0.5"), Version("v2.0.0")]),         # New Release serie
+        ("v1.5.2", [Version("v2.0.0"), Version("v1.5.1")]),         # Backport increment
     ],
 )
 def test_run_successful(mocker, version_tag, existing_tags):
@@ -84,20 +85,10 @@ def test_run_successful(mocker, version_tag, existing_tags):
     # Mock sys.exit to prevent the test from exiting
     mock_exit = mocker.patch("sys.exit")
 
-    # Mock the Version class
-    mock_version_class = mocker.patch("version_tag_check.version_tag_check_action.Version")
-    mock_version_instance = mock_version_class.return_value
-    mock_version_instance.is_valid_format.return_value = True
-
     # Mock the GitHubRepository class
     mock_repository_class = mocker.patch("version_tag_check.version_tag_check_action.GitHubRepository")
     mock_repository_instance = mock_repository_class.return_value
     mock_repository_instance.get_all_tags.return_value = existing_tags
-
-    # Mock the NewVersionValidator class
-    mock_validator_class = mocker.patch("version_tag_check.version_tag_check_action.NewVersionValidator")
-    mock_validator_instance = mock_validator_class.return_value
-    mock_validator_instance.is_valid_increment.return_value = True
 
     # Run the action
     action = VersionTagCheckAction()
@@ -109,12 +100,13 @@ def test_run_successful(mocker, version_tag, existing_tags):
 @pytest.mark.parametrize(
     "version_tag, existing_tags, is_valid_format, is_valid_increment, expected_exit_code, error_message",
     [
-        ("invalid_version", [], False, True, 1, "Tag does not match the required format"),  # Invalid format
-        ("invalid_version", ["v1.0.0"], False, True, 1, "Tag does not match the required format"),  # Invalid format
-        ("v1.0.3", ["v1.0.1"], True, False, 1, "New tag is not valid."),                    # Invalid increment
-        ("v1.0.0", ["v1.0.0"], True, False, 1, "New tag is not valid."),                    # Existing tag
-        ("v1.4.1", ["v2.0.0", "v1.4.2"], True, False, 1, "New tag is not valid."),          # Invalid backport increment
-        ("1.0.0", [], False, True, 1, "Tag does not match the required format"),          # Invalid format and increment
+        ("invalid_version", [], False, True, 1, "Tag does not match the required format"),                                                              # Invalid format
+        ("invalid_version", [Version("v1.0.0")], False, True, 1, "Tag does not match the required format"),                                             # Invalid format
+        ("v1.0.3", [Version("v1.0.1")], True, False, 1, "New tag v1.0.3 is not one patch higher than the latest tag v1.0.1."),                          # Invalid increment
+        ("v1.0.0", [Version("v1.0.0")], True, False, 1, "The tag already exists in repository"),                                                        # Existing tag
+        ("v1.4.1", [Version("v2.0.0"), Version("v1.4.2")], True, False, 1, "New tag v1.4.1 is not one patch higher than the latest tag v1.4.2."),       # Invalid backport increment
+        ("1.0.0", [], False, True, 1, "Tag does not match the required format"),                                                                        # Invalid format and increment
+        ("v3.0.1", [Version("v2.9.9"), Version("v1.0.0")], True, False, 1, "New tag v3.0.1 is not a valid major bump. Latest version: v2.9.9."),        # Invalid version gap
     ],
 )
 def test_run_unsuccessful(mocker, caplog, version_tag, existing_tags, is_valid_format, is_valid_increment, expected_exit_code, error_message):
@@ -132,20 +124,10 @@ def test_run_unsuccessful(mocker, caplog, version_tag, existing_tags, is_valid_f
 
     mocker.patch("sys.exit", mock_exit)
 
-    # Mock the Version class
-    mock_version_class = mocker.patch("version_tag_check.version_tag_check_action.Version")
-    mock_version_instance = mock_version_class.return_value
-    mock_version_instance.is_valid_format.return_value = is_valid_format
-
     # Mock the GitHubRepository class
     mock_repository_class = mocker.patch("version_tag_check.version_tag_check_action.GitHubRepository")
     mock_repository_instance = mock_repository_class.return_value
     mock_repository_instance.get_all_tags.return_value = existing_tags
-
-    # Mock the NewVersionValidator class
-    mock_validator_class = mocker.patch("version_tag_check.version_tag_check_action.NewVersionValidator")
-    mock_validator_instance = mock_validator_class.return_value
-    mock_validator_instance.is_valid_increment.return_value = is_valid_increment
 
     # Run the action
     caplog.set_level(logging.ERROR)
