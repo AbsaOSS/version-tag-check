@@ -45,6 +45,7 @@ class GitHubRepository:
         self.owner = owner
         self.repo = repo
         self.token = token
+
         self.headers = {"Authorization": f"Bearer {self.token}", "Accept": "application/vnd.github.v3+json"}
 
     def get_all_tags(self) -> list[Version]:

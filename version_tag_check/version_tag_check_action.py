@@ -41,8 +41,6 @@ class VersionTagCheckAction:
         """
         self.github_token: str = os.environ.get("INPUT_GITHUB_TOKEN", default="")
         self.version_tag_str: str = os.environ.get("INPUT_VERSION_TAG", default="")
-        self.branch: str = os.environ.get("INPUT_BRANCH", default="")
-        self.fails_on_error: bool = os.environ.get("INPUT_FAILS_ON_ERROR", "true").lower() == "true"
         self.github_repository: str = os.environ.get("INPUT_GITHUB_REPOSITORY", default="")
 
         self.__validate_inputs()
@@ -58,42 +56,22 @@ class VersionTagCheckAction:
         new_version = Version(self.version_tag_str)
         if not new_version.is_valid_format():
             logger.error('Tag does not match the required format "v[0-9]+.[0-9]+.[0-9]+"')
-            self.handle_failure()
+            sys.exit(1)
 
         repository: GitHubRepository = GitHubRepository(self.owner, self.repo, self.github_token)
         existing_versions: list[Version] = repository.get_all_tags()
 
+        if new_version in existing_versions:
+            logger.error("The tag already exists in repository.")
+            sys.exit(1)
+
         validator = NewVersionValidator(new_version, existing_versions)
         if validator.is_valid_increment():
-            self.write_output("true")
             logger.info("New tag is valid.")
             sys.exit(0)
         else:
             logger.error("New tag is not valid.")
-            self.handle_failure()
-
-    def write_output(self, valid_value) -> None:
-        """
-        Write the output to the file specified by the GITHUB_OUTPUT environment variable.
-
-        @param valid_value: The value to write to the output file.
-        @return: None
-        """
-        output_file = os.environ.get("GITHUB_OUTPUT", default="output.txt")
-        with open(output_file, "a", encoding="utf-8") as fh:
-            print(f"valid={valid_value}", file=fh)
-
-    def handle_failure(self) -> None:
-        """
-        Handle the failure of the action.
-
-        @return: None
-        """
-        self.write_output("false")
-        if self.fails_on_error:
             sys.exit(1)
-        else:
-            sys.exit(0)
 
     def __validate_inputs(self) -> None:
         """
@@ -111,8 +89,4 @@ class VersionTagCheckAction:
 
         if len(self.version_tag_str) == 0:
             logger.error("Failure: VERSION_TAG is not set correctly.")
-            sys.exit(1)
-
-        if len(self.branch) == 0:
-            logger.error("Failure: BRANCH is not set correctly.")
             sys.exit(1)

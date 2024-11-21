@@ -28,7 +28,6 @@ from version_tag_check.version_tag_check_action import VersionTagCheckAction
     ("INPUT_GITHUB_TOKEN", "Failure: GITHUB_TOKEN is not set correctly."),
     ("INPUT_GITHUB_REPOSITORY", "Failure: GITHUB_REPOSITORY is not set correctly."),
     ("INPUT_VERSION_TAG", "Failure: VERSION_TAG is not set correctly."),
-    ("INPUT_BRANCH", "Failure: BRANCH is not set correctly."),
 ])
 def test_validate_inputs_missing_variables(monkeypatch, caplog, missing_var, error_message):
     # Set all required environment variables
@@ -36,7 +35,6 @@ def test_validate_inputs_missing_variables(monkeypatch, caplog, missing_var, err
         "INPUT_GITHUB_TOKEN": "fake_token",
         "INPUT_GITHUB_REPOSITORY": "owner/repo",
         "INPUT_VERSION_TAG": "v1.0.0",
-        "INPUT_BRANCH": "main",
     }
     env_vars.pop(missing_var)  # Remove the variable to test
     if missing_var in os.environ.keys():
@@ -65,14 +63,10 @@ def test_run_successful(mocker, tmp_path):
     env_vars = {
         "INPUT_GITHUB_TOKEN": "fake_token",
         "INPUT_VERSION_TAG": "v1.0.1",
-        "INPUT_BRANCH": "main",
-        "INPUT_FAILS_ON_ERROR": "true",
         "INPUT_GITHUB_REPOSITORY": "owner/repo",
     }
     # Update os.environ with the test environment variables
     os.environ.update(env_vars)
-    if os.path.exists("output.txt"):
-        os.remove("output.txt")
 
     # Mock sys.exit to prevent the test from exiting
     mock_exit = mocker.patch("sys.exit")
@@ -92,14 +86,10 @@ def test_run_successful(mocker, tmp_path):
     mock_validator_instance = mock_validator_class.return_value
     mock_validator_instance.is_valid_increment.return_value = True
 
-    # Mock the output writing method
-    mock_output = mocker.patch("version_tag_check.version_tag_check_action.VersionTagCheckAction.write_output")
-
     # Run the action
     action = VersionTagCheckAction()
     action.run()
 
-    mock_output.assert_called_once_with("true")
     mock_exit.assert_called_once_with(0)
 
 def test_run_invalid_version_format(mocker, tmp_path, caplog):
@@ -107,13 +97,9 @@ def test_run_invalid_version_format(mocker, tmp_path, caplog):
     env_vars = {
         "INPUT_GITHUB_TOKEN": "fake_token",
         "INPUT_VERSION_TAG": "invalid_version",
-        "INPUT_BRANCH": "main",
-        "INPUT_FAILS_ON_ERROR": "true",
         "INPUT_GITHUB_REPOSITORY": "owner/repo",
     }
     os.environ.update(env_vars)
-    if os.path.exists("output.txt"):
-        os.remove("output.txt")
 
     # Mock sys.exit
     def mock_exit(code):
@@ -126,9 +112,6 @@ def test_run_invalid_version_format(mocker, tmp_path, caplog):
     mock_version_instance = mock_version_class.return_value
     mock_version_instance.is_valid_format.return_value = False  # Simulate invalid format
 
-    # Mock the output writing method
-    mock_output = mocker.patch("version_tag_check.version_tag_check_action.VersionTagCheckAction.write_output")
-
     # Run the action
     caplog.set_level(logging.ERROR)
     action = VersionTagCheckAction()
@@ -138,7 +121,6 @@ def test_run_invalid_version_format(mocker, tmp_path, caplog):
     # Assert that sys.exit was called with exit code 1
     assert e.value.code == 1
 
-    mock_output.assert_called_once_with("false")
     assert 'Tag does not match the required format' in caplog.text
 
 def test_run_invalid_version_increment(mocker, tmp_path):
@@ -146,13 +128,9 @@ def test_run_invalid_version_increment(mocker, tmp_path):
     env_vars = {
         "INPUT_GITHUB_TOKEN": "fake_token",
         "INPUT_VERSION_TAG": "v1.0.2",
-        "INPUT_BRANCH": "main",
-        "INPUT_FAILS_ON_ERROR": "true",
         "INPUT_GITHUB_REPOSITORY": "owner/repo",
     }
     os.environ.update(env_vars)
-    if os.path.exists("output.txt"):
-        os.remove("output.txt")
 
     # Mock sys.exit
     mock_exit = mocker.patch("sys.exit")
@@ -172,41 +150,8 @@ def test_run_invalid_version_increment(mocker, tmp_path):
     mock_validator_instance = mock_validator_class.return_value
     mock_validator_instance.is_valid_increment.return_value = False
 
-    # Mock the output writing method
-    mock_output = mocker.patch("version_tag_check.version_tag_check_action.VersionTagCheckAction.write_output")
-
     # Run the action
     action = VersionTagCheckAction()
     action.run()
 
-    mock_output.assert_called_once_with("false")
     mock_exit.assert_called_once_with(1)
-
-
-# handle_failure
-
-def test_handle_failure_fails_on_error_false(mocker):
-    # Set environment variables with 'INPUT_FAILS_ON_ERROR' set to 'false'
-    env_vars = {
-        "INPUT_GITHUB_TOKEN": "fake_token",
-        "INPUT_VERSION_TAG": "v1.0.0",
-        "INPUT_BRANCH": "main",
-        "INPUT_FAILS_ON_ERROR": "false",  # Set to 'false' to test else branch
-        "INPUT_GITHUB_REPOSITORY": "owner/repo",
-    }
-    mocker.patch.dict(os.environ, env_vars)
-
-    # Mock sys.exit to raise SystemExit exception
-    def mock_exit(code):
-        raise SystemExit(code)
-    mocker.patch("sys.exit", mock_exit)
-
-    # Instantiate the action
-    action = VersionTagCheckAction()
-
-    # Call handle_failure and expect SystemExit
-    with pytest.raises(SystemExit) as e:
-        action.handle_failure()
-
-    # Assert that sys.exit was called with exit code 0
-    assert e.value.code == 0

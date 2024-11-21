@@ -52,6 +52,20 @@ class NewVersionValidator:
             return None
         return max(self.__existing_versions)
 
+    def __get_filtered_versions(self, major: int, minor: Optional[int] = None) -> list[Version]:
+        """
+        Filter the existing versions based on major and optionally minor versions.
+
+        @param major: The major version to filter by
+        @param minor: The minor version to filter by (optional)
+        @return: A list of versions matching the criteria
+        """
+        return [
+            version
+            for version in self.__existing_versions
+            if version.major == major and (minor is None or version.minor == minor)
+        ]
+
     def is_valid_increment(self) -> bool:
         """
         Check if the new version is a valid increment from the latest version.
@@ -59,20 +73,35 @@ class NewVersionValidator:
         @return: True if the new version is a valid increment, False otherwise
         """
         latest_version: Optional[Version] = self.__get_latest_version()
+        logger.debug("Validator: Latest version: %s", latest_version)
         if not latest_version:
             # Any version is valid if no previous versions exist
+            logger.info("No previous versions exist. New version is valid.")
             return True
 
-        lv: Optional[Version] = latest_version
         nv: Version = self.__new_version
 
-        if nv.major == lv.major:
-            if nv.minor == lv.minor:
-                return nv.patch == lv.patch + 1
-            if nv.minor == lv.minor + 1:
-                return nv.patch == 0
-        elif nv.major == lv.major + 1:
-            return nv.minor == 0 and nv.patch == 0
+        # Filter versions matching the major and minor version of the new version
+        filtered_versions = self.__get_filtered_versions(nv.major, nv.minor)
+        if filtered_versions:
+            latest_filtered_version = max(filtered_versions)
+            logger.debug("Validator: Latest filtered version: %s", latest_filtered_version)
 
-        logger.error("New tag %s is not one version higher than the latest tag %s.", self.__new_version, latest_version)
+            # Validate against the latest filtered version
+            if nv.major == latest_filtered_version.major and nv.minor == latest_filtered_version.minor:
+                if nv.patch == latest_filtered_version.patch + 1:
+                    return True
+                logger.error(f"New tag {nv} is not one patch higher than the latest tag {latest_filtered_version}.")
+
+        # Check if this is a valid minor or major bump
+        if nv.major == latest_version.major:
+            if nv.minor == latest_version.minor + 1:
+                if nv.patch == 0:
+                    return True
+                logger.error(f"New tag {nv} is not a valid minor bump. Latest version: {latest_version}.")
+        elif nv.major == latest_version.major + 1:
+            if nv.minor == 0 and nv.patch == 0:
+                return True
+            logger.error(f"New tag {nv} is not a valid major bump. Latest version: {latest_version}.")
+
         return False
