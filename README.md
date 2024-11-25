@@ -59,7 +59,7 @@ See the default action step definition:
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
   with:
-    github-repository: "{ org }/{ repo }"   # ${{ github.repository }}
+    github-repository: "{ org }/{ repo }"   # e.g. ${{ github.repository }}
     version-tag: "v0.1.0"
 ```
 

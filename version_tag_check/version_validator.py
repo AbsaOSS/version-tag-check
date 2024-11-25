@@ -91,17 +91,17 @@ class NewVersionValidator:
             if nv.major == latest_filtered_version.major and nv.minor == latest_filtered_version.minor:
                 if nv.patch == latest_filtered_version.patch + 1:
                     return True
-                logger.error(f"New tag {nv} is not one patch higher than the latest tag {latest_filtered_version}.")
+                logger.error("New tag %s is not one patch higher than the latest tag %s.", nv, latest_filtered_version)
 
         # Check if this is a valid minor or major bump
         if nv.major == latest_version.major:
             if nv.minor == latest_version.minor + 1:
                 if nv.patch == 0:
                     return True
-                logger.error(f"New tag {nv} is not a valid minor bump. Latest version: {latest_version}.")
+                logger.error("New tag %s is not a valid minor bump. Latest version: %s.", nv, latest_version)
         elif nv.major == latest_version.major + 1:
             if nv.minor == 0 and nv.patch == 0:
                 return True
-            logger.error(f"New tag {nv} is not a valid major bump. Latest version: {latest_version}.")
+            logger.error("New tag %s is not a valid major bump. Latest version: %s.", nv, latest_version)
 
         return False
