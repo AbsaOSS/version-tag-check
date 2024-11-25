@@ -32,7 +32,7 @@ class Version:
     Class to represent a version and compare it to other versions.
     """
 
-    VERSION_REGEX = r"^v?(\d+)\.(\d+)\.(\d+)$"
+    VERSION_REGEX = r"^v(\d+)\.(\d+)\.(\d+)$"
 
     def __init__(self, version_str: str, version_regex: str = VERSION_REGEX) -> None:
         """

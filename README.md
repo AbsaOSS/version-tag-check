@@ -19,6 +19,7 @@ A GH action for validating version tag sequences and ensuring compliance with ve
 ## Motivation
 
 This action is designed to help maintainers and contributors ensure that version tags are sequenced correctly and comply with versioning standards. It can be used to prevent common issues such as:
+- Duplicate version tags on input
 - Missing version tags
 - Incorrect version sequences
 - Non-standard version formats
@@ -41,21 +42,6 @@ This action is designed to help maintainers and contributors ensure that version
 - **Description**: The version tag to check for in the repository. Example: `v0.1.0`.
 - **Required**: Yes
 
-### `branch`
-- **Description**: The branch to check for the version tag. Example: `master`.
-- **Required**: Yes
-
-### `fails-on-error`
-- **Description**: Whether the action should fail if an error occurs.
-- **Required**: No
-- **Default**: `true`
-
-## Outputs
-
-### `valid`
-- **Description**: Whether the version tag is valid.
-- **Value**: `true` or `false`
-
 ## Usage
 
 ### Adding the Action to Your Workflow
@@ -73,10 +59,8 @@ See the default action step definition:
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
   with:
-    github-repository: "{ org }/{ repo }"
+    github-repository: "{ org }/{ repo }"   # e.g. ${{ github.repository }}
     version-tag: "v0.1.0"
-    branch: "master"
-    fails-on-error: "false"
 ```
 
 ### Supported Version Tags Formats
@@ -215,22 +199,10 @@ fi
 # Set necessary environment variables
 export INPUT_GITHUB_TOKEN="$GITHUB_TOKEN"
 export INPUT_VERSION_TAG="v1.2.3"
-export INPUT_BRANCH="main"
-export INPUT_FAILS_ON_ERROR="true"
 export INPUT_GITHUB_REPOSITORY="AbsaOSS/generate-release-notes"
-export GITHUB_OUTPUT="output.txt"   # File to capture outputs
-
-# Remove existing output file if it exists
-if [ -f "$GITHUB_OUTPUT" ]; then
-  rm "$GITHUB_OUTPUT"
-fi
 
 # Run the main script
 python main.py
-
-# Display the outputs
-echo "Action Outputs:"
-cat "$GITHUB_OUTPUT"
 ```
 
 ## Contribution Guidelines
