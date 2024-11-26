@@ -54,7 +54,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag-name: ${{ github.event.inputs.tag-name }}
+#          tag-name: ${{ github.event.inputs.tag-name }}
+          tag-name: 'v0.3.0'
           chapters: '[
             {"title": "No entry 🚫", "label": "duplicate"},
             {"title": "No entry 🚫", "label": "invalid"},
@@ -79,7 +80,8 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const tag = core.getInput('tag-name')
+#            const tag = core.getInput('tag-name')
+            const tag = 'v0.3.0'
             const ref = `refs/tags/${tag}`;
             const sha = context.sha; // The SHA of the commit to tag
 
@@ -92,15 +94,18 @@ jobs:
 
             console.log(`Tag created: ${tag}`);
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          tag-name: ${{ github.event.inputs.tag-name }}
+#          tag-name: ${{ github.event.inputs.tag-name }}
+          tag-name: 'v0.3.0'
 
       - name: Create Draft Release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: ${{ github.event.inputs.tag-name }}
+#          name: ${{ github.event.inputs.tag-name }}
+          name: 'v0.3.0'
           body: ${{ steps.generate_release_notes.outputs.release-notes }}
-          tag_name: ${{ github.event.inputs.tag-name }}
+#          tag_name: ${{ github.event.inputs.tag-name }}
+          tag_name: 'v0.3.0'
           draft: true
           prerelease: false
