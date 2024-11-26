@@ -16,14 +16,17 @@
 
 name: Release - create draft release
 on:
-  workflow_dispatch:
-    inputs:
-      tag-name:
-        description: 'Name of git version tag to be created, and then draft release created. Syntax: "v[0-9]+.[0-9]+.[0-9]+".'
-        required: true
+#  workflow_dispatch:
+#    inputs:
+#      tag-name:
+#        description: 'Name of git version tag to be created, and then draft release created. Syntax: "v[0-9]+.[0-9]+.[0-9]+".'
+#        required: true
+  pull_request:
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
+    branches: [ master ]
 
 jobs:
-  check-tag:
+  release-draft:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -42,26 +45,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           github-repository: ${{ github.repository }}
-          version-tag: ${{ github.event.inputs.tag-name }}
-          branch: 'master'
-          fails-on-error: 'true'
-
-  release-draft:
-    needs: check-tag
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - uses: actions/setup-python@v5.1.1
-        with:
-          python-version: '3.11'
+          version-tag: 'v0.3.0'
+#          version-tag: ${{ github.event.inputs.tag-name }}
 
       - name: Generate Release Notes
         id: generate_release_notes
-        uses: AbsaOSS/generate-release-notes@v0.4.0
+        uses: AbsaOSS/generate-release-notes@feature/117-Already-releases-issue-are-returned-from-GitHub-API
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
