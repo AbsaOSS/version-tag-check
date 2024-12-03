@@ -65,7 +65,6 @@ Depending on the combination of these inputs, the action will behave differently
 | **No**                                | `false`                                | Performed                            | ✅ **Success**: The version tag does not exist and is a valid increment.         |
 | **No**                                | `false`                                | Performed                            | ❌ **Failure**: The version tag does not exist and is **not** a valid increment. |
 
-
 ## Usage
 
 ### Adding the Action to Your Workflow

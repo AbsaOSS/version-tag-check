@@ -62,15 +62,19 @@ class VersionTagCheckAction:
         repository: GitHubRepository = GitHubRepository(self.owner, self.repo, self.github_token)
         existing_versions: list[Version] = repository.get_all_tags()
 
+        # check if the tag exists in repository
         if new_version in existing_versions:
+            # it exists, check if not expected
             if not self.should_exist:
                 logger.error("The tag already exists in the repository.")
                 sys.exit(1)
         else:
+            # it does not exist, check if expected
             if self.should_exist:
                 logger.error("The tag does not exist in the repository.")
                 sys.exit(1)
 
+        # if expected to exist, exit here, no more checks expected to be done
         if self.should_exist:
             sys.exit(0)
 
