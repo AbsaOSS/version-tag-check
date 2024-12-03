@@ -42,6 +42,11 @@ This action is designed to help maintainers and contributors ensure that version
 - **Description**: The version tag to check for in the repository. Example: `v0.1.0`.
 - **Required**: Yes
 
+### `should-exist`
+- **Description**: Flag to indicate if the version tag should exist in the repository. Set to `true` to check if the version tag should exist. Setting by `true` disables increment validity check. 
+- **Default**: `false`
+- **Required**: No
+
 ## Usage
 
 ### Adding the Action to Your Workflow
@@ -61,6 +66,7 @@ See the default action step definition:
   with:
     github-repository: "{ org }/{ repo }"   # e.g. ${{ github.repository }}
     version-tag: "v0.1.0"
+    should-exist: "false"
 ```
 
 ### Supported Version Tags Formats
