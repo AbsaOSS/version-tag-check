@@ -47,6 +47,19 @@ This action is designed to help maintainers and contributors ensure that version
 - **Default**: `false`
 - **Required**: No
 
+### Behavior Summary
+
+Depending on the combination of these inputs, the action will behave differently. The table below outlines the possible scenarios:
+
+| `version-tag` Exists in Repository? | `should-exist` | Increment Validity Check | Behavior                                                                 |
+|-------------------------------------|----------------|--------------------------|--------------------------------------------------------------------------|
+| **Yes**                             | `true`         | Skipped                  | ✅ **Success**: The version tag exists as expected.                      |
+| **No**                              | `true`         | Skipped                  | ❌ **Failure**: The version tag does not exist in the repository.        |
+| **Yes**                             | `false`        | Skipped                  | ❌ **Failure**: The version tag should not exist but does.               |
+| **No**                              | `false`        | Performed                | ✅ **Success**: The version tag does not exist and is a valid increment. |
+| **No**                              | `false`        | Performed                | ❌ **Failure**: The version tag does not exist and is **not** a valid increment. |
+
+
 ## Usage
 
 ### Adding the Action to Your Workflow
