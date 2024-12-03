@@ -43,21 +43,27 @@ This action is designed to help maintainers and contributors ensure that version
 - **Required**: Yes
 
 ### `should-exist`
-- **Description**: Flag to indicate if the version tag should exist in the repository. Set to `true` to check if the version tag should exist. Setting by `true` disables increment validity check. 
+- **Description**: Flag to indicate if the version tag should exist in the repository. Set to `true` to check if the version tag should exist. Setting to `true` disables increment validity check. 
 - **Default**: `false`
 - **Required**: No
 
 ### Behavior Summary
 
 Depending on the combination of these inputs, the action will behave differently. The table below outlines the possible scenarios:
+- **1st control:** check received tag format
+  - **Note:** Will be done all times.
+- **2nd control:** check tag presence in repository
+  - **Note:** Will be done all times. `should-exist` flag will determine the expected presence of the tag.
+- **3rd control:** check tag version increment validity (path or minor or major +1)
+   - **Note:** This check is skipped when `should-exist` is set to `true`. 
 
-| `version-tag` Exists in Repository? | `should-exist` | Increment Validity Check | Behavior                                                                 |
-|-------------------------------------|----------------|--------------------------|--------------------------------------------------------------------------|
-| **Yes**                             | `true`         | Skipped                  | ✅ **Success**: The version tag exists as expected.                      |
-| **No**                              | `true`         | Skipped                  | ❌ **Failure**: The version tag does not exist in the repository.        |
-| **Yes**                             | `false`        | Skipped                  | ❌ **Failure**: The version tag should not exist but does.               |
-| **No**                              | `false`        | Performed                | ✅ **Success**: The version tag does not exist and is a valid increment. |
-| **No**                              | `false`        | Performed                | ❌ **Failure**: The version tag does not exist and is **not** a valid increment. |
+| Tag present in repository (2nd check) | Expected presence of tag in repository | Increment Validity Check (3rd check) | Action final state                                                             |
+|---------------------------------------|----------------------------------------|--------------------------------------|---------------------------------------------------------------------------------|
+| **Yes**                               | `true`                                 | Skipped                              | ✅ **Success**: The version tag exists as expected.                              |
+| **No**                                | `true`                                 | Skipped                              | ❌ **Failure**: The version tag does not exist in the repository.                |
+| **Yes**                               | `false`                                | Skipped                              | ❌ **Failure**: The version tag should not exist but does.                       |
+| **No**                                | `false`                                | Performed                            | ✅ **Success**: The version tag does not exist and is a valid increment.         |
+| **No**                                | `false`                                | Performed                            | ❌ **Failure**: The version tag does not exist and is **not** a valid increment. |
 
 
 ## Usage
