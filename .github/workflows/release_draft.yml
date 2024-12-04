@@ -43,8 +43,6 @@ jobs:
         with:
           github-repository: ${{ github.repository }}
           version-tag: ${{ github.event.inputs.tag-name }}
-          branch: 'master'
-          fails-on-error: 'true'
 
   release-draft:
     needs: check-tag

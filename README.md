@@ -24,6 +24,10 @@ This action is designed to help maintainers and contributors ensure that version
 - Incorrect version sequences
 - Non-standard version formats
 
+**Action provides two possible regimes (based on `should-exist` flag):**
+- check that the version tag is an increment of an exiting one (`should-exist=false`, default)
+- check that the version tag is present in the repository (`should-exist=true`)
+
 ## Requirements
 - **GitHub Token**: A GitHub token with permission to fetch repository data such as Issues and Pull Requests.
 - **Python 3.11+**: Ensure you have Python 3.11 installed on your system.
@@ -41,6 +45,29 @@ This action is designed to help maintainers and contributors ensure that version
 ### `version-tag`
 - **Description**: The version tag to check for in the repository. Example: `v0.1.0`.
 - **Required**: Yes
+
+### `should-exist`
+- **Description**: Flag to indicate if the version tag should exist in the repository. Set to `true` to check if the version tag should exist. Setting to `true` disables increment validity check. 
+- **Default**: `false`
+- **Required**: No
+
+### Behavior Summary
+
+Depending on the combination of these inputs, the action behaves slightly differently. 
+The action checks
+- **1st check:** checks the received tag format (semantic version prefixed by a `v`)
+- **2nd check:** checks tag presence in the target git repository
+  - _Note:_ `should-exist` flag determines the expected presence of the tag in the repository
+- **3rd check:** checks if the tag version is a valid increment of a previous version 
+   - _Note:_ This check is *not executed** when `should-exist` is set to `true`. 
+
+| Tag present in repository (2nd check) | Expected presence of tag in repository | Increment Validity Check (3rd check) | Action final state                                                             |
+|---------------------------------------|----------------------------------------|--------------------------------------|---------------------------------------------------------------------------------|
+| **Yes**                               | `true`                                 | Skipped                              | ✅ **Success**: The version tag exists as expected.                              |
+| **No**                                | `true`                                 | Skipped                              | ❌ **Failure**: The version tag does not exist in the repository.                |
+| **Yes**                               | `false`                                | Skipped                              | ❌ **Failure**: The version tag should not exist but does.                       |
+| **No**                                | `false`                                | Performed                            | ✅ **Success**: The version tag does not exist and is a valid increment.         |
+| **No**                                | `false`                                | Performed                            | ❌ **Failure**: The version tag does not exist and is **not** a valid increment. |
 
 ## Usage
 
@@ -61,6 +88,7 @@ See the default action step definition:
   with:
     github-repository: "{ org }/{ repo }"   # e.g. ${{ github.repository }}
     version-tag: "v0.1.0"
+    should-exist: "false"
 ```
 
 ### Supported Version Tags Formats

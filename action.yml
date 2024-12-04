@@ -23,6 +23,10 @@ inputs:
   version-tag:
     description: 'The version tag sequence to validate. Example: "v1.2.3".'
     required: true
+  should-exist:
+    description: 'Flag to indicate if the version tag should exist in the repository. Setting to `true` disables increment validity check.
+    required: false
+    default: 'false'
 
 branding:
   icon: 'book'
@@ -60,6 +64,7 @@ runs:
         INPUT_GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
         INPUT_GITHUB_REPOSITORY: ${{ inputs.github-repository }}
         INPUT_VERSION_TAG: ${{ inputs.version-tag }}
+        INPUT_SHOULD_EXIST: ${{ inputs.should-exist }}
       run: |
         source .venv/bin/activate
         python ${{ github.action_path }}/main.py

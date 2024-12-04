@@ -42,6 +42,7 @@ class VersionTagCheckAction:
         self.github_token: str = os.environ.get("INPUT_GITHUB_TOKEN", default="")
         self.version_tag_str: str = os.environ.get("INPUT_VERSION_TAG", default="")
         self.github_repository: str = os.environ.get("INPUT_GITHUB_REPOSITORY", default="")
+        self.should_exist: bool = os.environ.get("INPUT_SHOULD_EXIST", default="false").lower() == "true"
 
         self.__validate_inputs()
 
@@ -61,15 +62,28 @@ class VersionTagCheckAction:
         repository: GitHubRepository = GitHubRepository(self.owner, self.repo, self.github_token)
         existing_versions: list[Version] = repository.get_all_tags()
 
+        # check if the tag exists in repository
         if new_version in existing_versions:
-            logger.error("The tag already exists in repository.")
-            sys.exit(1)
+            # it exists, check if not expected
+            if not self.should_exist:
+                logger.error("The tag already exists in the repository.")
+                sys.exit(1)
+        else:
+            # it does not exist, check if expected
+            if self.should_exist:
+                logger.error("The tag does not exist in the repository.")
+                sys.exit(1)
+
+        # if expected to exist, exit here, no more checks expected to be done
+        if self.should_exist:
+            sys.exit(0)
 
         validator = NewVersionValidator(new_version, existing_versions)
         if validator.is_valid_increment():
-            logger.info("New tag is valid.")
+            logger.info("New tag is valid increment.")
             sys.exit(0)
         else:
+            logger.error("New tag is not valid increment.")
             sys.exit(1)
 
     def __validate_inputs(self) -> None:
