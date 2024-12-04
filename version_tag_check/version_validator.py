@@ -72,6 +72,7 @@ class NewVersionValidator:
 
         @return: True if the new version is a valid increment, False otherwise
         """
+        # check if the new version is the first version
         latest_version: Optional[Version] = self.__get_latest_version()
         logger.debug("Validator: Latest version: %s", latest_version)
         if not latest_version:
