@@ -49,13 +49,13 @@ This action is designed to help maintainers and contributors ensure that version
 
 ### Behavior Summary
 
-Depending on the combination of these inputs, the action will behave differently. The table below outlines the possible scenarios:
-- **1st control:** check received tag format
-  - **Note:** Will be done all times.
-- **2nd control:** check tag presence in repository
-  - **Note:** Will be done all times. `should-exist` flag will determine the expected presence of the tag.
-- **3rd control:** check tag version increment validity (path or minor or major +1)
-   - **Note:** This check is skipped when `should-exist` is set to `true`. 
+Depending on the combination of these inputs, the action behaves slightly differently. 
+The action checks
+- **1st check:** checks the received tag format (semantic version prefixed by a `v`)
+- **2nd check:** checks tag presence in the target git repository
+  - _Note:_ `should-exist` flag determines the expected presence of the tag in the repository
+- **3rd check:** checks if the tag version is a valid increment of a previous version 
+   - _Note:_ This check is *not executed** when `should-exist` is set to `true`. 
 
 | Tag present in repository (2nd check) | Expected presence of tag in repository | Increment Validity Check (3rd check) | Action final state                                                             |
 |---------------------------------------|----------------------------------------|--------------------------------------|---------------------------------------------------------------------------------|
