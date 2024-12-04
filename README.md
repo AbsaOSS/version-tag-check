@@ -24,9 +24,9 @@ This action is designed to help maintainers and contributors ensure that version
 - Incorrect version sequences
 - Non-standard version formats
 
-**Action provides two regimes of check:**
-- check new version tag for increment validity (`should-exist` flag is set to `false`, default)
-- check existing version tag presence in the repository (`should-exist` flag is set to `true`)
+**Action provides two possible regimes (based on `should-exist` flag):**
+- check that the version tag is an increment of an exiting one (`should-exist=false`, default)
+- check that the version tag is present in the repository (`should-exist=true`)
 
 ## Requirements
 - **GitHub Token**: A GitHub token with permission to fetch repository data such as Issues and Pull Requests.
