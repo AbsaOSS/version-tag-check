@@ -24,7 +24,7 @@ inputs:
     description: 'The version tag sequence to validate. Example: "v1.2.3".'
     required: true
   should-exist:
-    description: 'Flag to indicate if the version tag should exist in the repository. Setting to `true` disables increment validity check.
+    description: 'Flag to indicate if the version tag should exist in the repository. Setting to `true` disables increment validity check.'
     required: false
     default: 'false'
 
