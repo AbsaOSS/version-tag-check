@@ -24,6 +24,7 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
+
 def get_action_input(name: str, default: Optional[str] = None) -> str:
     """
     Retrieve the value of a specified input parameter from environment variables.
