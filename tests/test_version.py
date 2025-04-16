@@ -128,8 +128,15 @@ def test_greater_than_other_is_none():
 
 # __str__
 
-def test_str_representation():
+def test_str_representation_no_v_prefix():
     version_str = "1.2.3"
+    version = Version(version_str)
+
+    assert version.is_valid_format() == False
+    assert str(version) == "vx.x.x"
+
+def test_str_representation_v_prefix():
+    version_str = "v1.2.3"
     version = Version(version_str)
 
     assert str(version) == version_str

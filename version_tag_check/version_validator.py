@@ -52,7 +52,7 @@ class NewVersionValidator:
             return None
         return max(self.__existing_versions)
 
-    def __get_filtered_versions(self, major: int, minor: Optional[int] = None) -> list[Version]:
+    def __get_filtered_versions(self, major: Optional[int], minor: Optional[int] = None) -> list[Version]:
         """
         Filter the existing versions based on major and optionally minor versions.
 
@@ -63,7 +63,7 @@ class NewVersionValidator:
         return [
             version
             for version in self.__existing_versions
-            if version.major == major and (minor is None or version.minor == minor)
+            if (major is None or version.major == major) and (minor is None or version.minor == minor)
         ]
 
     def is_valid_increment(self) -> bool:
@@ -84,23 +84,23 @@ class NewVersionValidator:
 
         # Filter versions matching the major and minor version of the new version
         filtered_versions = self.__get_filtered_versions(nv.major, nv.minor)
-        if filtered_versions:
+        if len(filtered_versions) > 0:
             latest_filtered_version = max(filtered_versions)
             logger.debug("Validator: Latest filtered version: %s", latest_filtered_version)
 
             # Validate against the latest filtered version
             if nv.major == latest_filtered_version.major and nv.minor == latest_filtered_version.minor:
-                if nv.patch == latest_filtered_version.patch + 1:
+                if nv.patch == (latest_filtered_version.patch if latest_filtered_version.patch else 0) + 1:
                     return True
                 logger.error("New tag %s is not one patch higher than the latest tag %s.", nv, latest_filtered_version)
 
         # Check if this is a valid minor or major bump
         if nv.major == latest_version.major:
-            if nv.minor == latest_version.minor + 1:
+            if nv.minor == (latest_version.minor if latest_version.minor else 0) + 1:
                 if nv.patch == 0:
                     return True
                 logger.error("New tag %s is not a valid minor bump. Latest version: %s.", nv, latest_version)
-        elif nv.major == latest_version.major + 1:
+        elif nv.major == (latest_version.major if latest_version.major else 0) + 1:
             if nv.minor == 0 and nv.patch == 0:
                 return True
             logger.error("New tag %s is not a valid major bump. Latest version: %s.", nv, latest_version)

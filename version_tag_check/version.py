@@ -41,15 +41,14 @@ class Version:
         @param version_str: The version string in the format "vX.Y.Z"
         @return: None
         """
-        self.__version_str = version_str
         self.__version_regex = version_regex
 
-        self.__major = None
-        self.__minor = None
-        self.__patch = None
-        self.__valid = None
+        self.__major: Optional[int] = None
+        self.__minor: Optional[int] = None
+        self.__patch: Optional[int] = None
+        self.__valid: Optional[bool] = None
 
-        self.__parse()
+        self.__parse(version_str)
 
     @property
     def major(self) -> Optional[int]:
@@ -78,20 +77,20 @@ class Version:
         """
         return self.__patch
 
-    def __parse(self) -> None:
+    def __parse(self, version_str: str) -> None:
         """
         Parse the version string into major, minor and patch.
 
         @return: None
         """
-        match = re.match(self.__version_regex, self.__version_str)
+        match = re.match(self.__version_regex, version_str)
         if match:
             self.__major, self.__minor, self.__patch = map(int, match.groups())
             self.__valid = True
-            logger.info("Version '%s' parsed successfully.", self.__version_str)
+            logger.info("Version '%s' parsed successfully.", version_str)
         else:
             self.__valid = False
-            logger.error("Version '%s' does not match the required format.", self.__version_str)
+            logger.error("Version '%s' does not match the required format.", version_str)
 
     def is_valid_format(self) -> bool:
         """
@@ -99,9 +98,9 @@ class Version:
 
         @return: True if the version string is in the correct format, False otherwise
         """
-        return self.__valid
+        return self.__valid if self.__valid is not None else False
 
-    def __eq__(self, other) -> Optional[bool]:
+    def __eq__(self, other) -> bool:
         """
         Compare the Version to another Version.
 
@@ -146,10 +145,15 @@ class Version:
 
         return (self.major, self.minor, self.patch) > (other.major, other.minor, other.patch)
 
-    def __str__(self) -> Optional[str]:
+    def __str__(self) -> str:
         """
         Get the string representation of the Version.
 
         @return: The string representation of the Version
         """
-        return self.__version_str
+        placeholder = "x"
+
+        major = self.major if self.major is not None else placeholder
+        minor = self.minor if self.minor is not None else placeholder
+        patch = self.patch if self.patch is not None else placeholder
+        return f"v{major}.{minor}.{patch}"

@@ -3,7 +3,6 @@
 - [Motivation](#motivation)
 - [Requirements](#requirements)
 - [Inputs](#inputs)
-- [Outputs](#outputs)
 - [Usage](#usage)
 - [Running Static Code Analysis](#running-static-code-analysis)
 - [Run Black Tool Locally](#run-black-tool-locally)
@@ -93,7 +92,6 @@ See the default action step definition:
 ```
 
 ### Supported Version Tags Formats
-- `1.0.0`
 - `v1.0.0`
 
 ### Support Version Weight Comparison

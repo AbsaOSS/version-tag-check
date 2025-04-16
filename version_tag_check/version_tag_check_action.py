@@ -18,16 +18,17 @@
 This module contains the VersionTagCheckAction class which is the main entry point for the GitHub Action.
 """
 import logging
-import os
 import sys
 
 from version_tag_check.github_repository import GitHubRepository
+from version_tag_check.utils.gh_action import get_action_input, set_action_failed
 from version_tag_check.version import Version
 from version_tag_check.version_validator import NewVersionValidator
 
 logger = logging.getLogger(__name__)
 
 
+# pylint: disable=too-few-public-methods
 class VersionTagCheckAction:
     """
     Class to handle the Version Tag Check GitHub Action
@@ -39,10 +40,10 @@ class VersionTagCheckAction:
 
         @return: None
         """
-        self.github_token: str = os.environ.get("INPUT_GITHUB_TOKEN", default="")
-        self.version_tag_str: str = os.environ.get("INPUT_VERSION_TAG", default="")
-        self.github_repository: str = os.environ.get("INPUT_GITHUB_REPOSITORY", default="")
-        self.should_exist: bool = os.environ.get("INPUT_SHOULD_EXIST", default="false").lower() == "true"
+        self.github_token: str = get_action_input("GITHUB_TOKEN", "")
+        self.version_tag_str: str = get_action_input("VERSION_TAG", "")
+        self.github_repository: str = get_action_input("GITHUB_REPOSITORY", "")
+        self.should_exist: bool = get_action_input("SHOULD_EXIST", "false").lower() == "true"
 
         self.__validate_inputs()
 
@@ -56,8 +57,7 @@ class VersionTagCheckAction:
         """
         new_version = Version(self.version_tag_str)
         if not new_version.is_valid_format():
-            logger.error('Tag does not match the required format "v[0-9]+.[0-9]+.[0-9]+"')
-            sys.exit(1)
+            set_action_failed('Tag does not match the required format "v[0-9]+.[0-9]+.[0-9]+"')
 
         repository: GitHubRepository = GitHubRepository(self.owner, self.repo, self.github_token)
         existing_versions: list[Version] = repository.get_all_tags()
@@ -66,13 +66,11 @@ class VersionTagCheckAction:
         if new_version in existing_versions:
             # it exists, check if not expected
             if not self.should_exist:
-                logger.error("The tag already exists in the repository.")
-                sys.exit(1)
+                set_action_failed("The tag already exists in the repository.")
         else:
             # it does not exist, check if expected
             if self.should_exist:
-                logger.error("The tag does not exist in the repository.")
-                sys.exit(1)
+                set_action_failed("The tag does not exist in the repository.")
 
         # if expected to exist, exit here, no more checks expected to be done
         if self.should_exist:
@@ -83,8 +81,7 @@ class VersionTagCheckAction:
             logger.info("New tag is valid increment.")
             sys.exit(0)
         else:
-            logger.error("New tag is not valid increment.")
-            sys.exit(1)
+            set_action_failed("New tag is not valid increment.")
 
     def __validate_inputs(self) -> None:
         """
@@ -93,13 +90,10 @@ class VersionTagCheckAction:
         @return: None
         """
         if len(self.github_token) == 0:
-            logger.error("Failure: GITHUB_TOKEN is not set correctly.")
-            sys.exit(1)
+            set_action_failed("Failure: GITHUB_TOKEN is not set correctly.")
 
         if not self.github_repository:
-            logger.error("Failure: GITHUB_REPOSITORY is not set correctly.")
-            sys.exit(1)
+            set_action_failed("Failure: GITHUB_REPOSITORY is not set correctly.")
 
         if len(self.version_tag_str) == 0:
-            logger.error("Failure: VERSION_TAG is not set correctly.")
-            sys.exit(1)
+            set_action_failed("Failure: VERSION_TAG is not set correctly.")
