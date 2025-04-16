@@ -129,13 +129,13 @@ def test_run_successful_should_exist(mocker, version_tag, should_exist, existing
 @pytest.mark.parametrize(
     "version_tag, should_exist, existing_tags, is_valid_format, is_valid_increment, expected_exit_code, error_message",
     [
-        ("invalid_version", "false", [], False, True, 1, "Tag does not match the required format"),                                                              # Invalid format
-        ("invalid_version", "false", [Version("v1.0.0")], False, True, 1, "Tag does not match the required format"),                                             # Invalid format
+        ("invalid_version", "false", [], False, True, 1, "Version 'invalid_version' does not match the required format"),                                                              # Invalid format
+        ("invalid_version", "false", [Version("v1.0.0")], False, True, 1, "Version 'invalid_version' does not match the required format"),                                             # Invalid format
         ("v1.0.3", "false", [Version("v1.0.1")], True, False, 1, "New tag v1.0.3 is not one patch higher than the latest tag v1.0.1."),                          # Invalid increment
         ("v1.0.2", "true", [Version("v1.0.1")], True, False, 1, "The tag does not exist in the repository."),                                                    # Tag should exist
         ("v1.0.0", "false", [Version("v1.0.0")], True, False, 1, "The tag already exists in the repository"),                                                    # Existing tag
         ("v1.4.1", "false", [Version("v2.0.0"), Version("v1.4.2")], True, False, 1, "New tag v1.4.1 is not one patch higher than the latest tag v1.4.2."),       # Invalid backport increment
-        ("1.0.0", "false", [], False, True, 1, "Tag does not match the required format"),                                                                        # Invalid format and increment
+        ("1.0.0", "false", [], False, True, 1, "Version '1.0.0' does not match the required format"),                                                                        # Invalid format and increment
         ("v3.0.1", "false", [Version("v2.9.9"), Version("v1.0.0")], True, False, 1, "New tag v3.0.1 is not a valid major bump. Latest version: v2.9.9."),        # Invalid version gap
     ],
 )
