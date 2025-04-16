@@ -34,7 +34,7 @@ def get_action_input(name: str, default: Optional[str] = None) -> str:
 
     @return: The value of the specified input parameter, or an empty string if the environment variable is not set.
     """
-    return os.getenv(f'INPUT_{name.replace("-", "_").upper()}', default)    # type: ignore[arg-type]
+    return os.getenv(f'INPUT_{name.replace("-", "_").upper()}', default)  # type: ignore[arg-type]
 
 
 def set_action_failed(message: str) -> None:
