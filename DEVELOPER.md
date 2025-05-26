@@ -6,7 +6,7 @@
 - [Run Black Tool Locally](#run-black-tool-locally)
 - [Run mypy Tool Locally](#run-mypy-tool-locally)
 - [Run Unit Tests with Pytest](#run-unit-tests-with-pytest)
-- [Code Coverage with pytest-cov](#check-coverage-with-pytest-cov)
+- [Code Coverage with pytest-cov](#code-coverage-with-pytest-cov)
 - [Releasing](#releasing)
 
 ## Project Setup
@@ -30,7 +30,7 @@ pip install -r requirements.txt
 ---
 ## Run Scripts Locally
 
-Create a *.sh file and place it in the project root.
+Create a `run_local.sh` file and place it in the project root. 
 
 ```bash
 #!/bin/bash
@@ -61,6 +61,20 @@ export INPUT_GITHUB_REPOSITORY="AbsaOSS/version-tag-check"
 python main.py
 ```
 
+### Make the script executable
+
+To avoid permission errors, make sure to give the script execute permissions:
+
+```bash
+chmod +x run_local.sh
+```
+
+Now you can run the script anytime with:
+
+```bash
+./run_local.sh
+```
+
 ---
 ## Run Pylint Check Locally
 
@@ -70,7 +84,7 @@ It checks for errors, enforces coding standards, looks for code smells, etc.
 We do exclude the `tests/` file from the Pylint check.
 
 Pylint displays a global evaluation score for the code, rated out of a maximum score of 10.0.
-We are aiming to keep our code quality high above the score 9.5.
+We aim to keep our Pylint score above 9.5.
 
 Follow these steps to run Pylint check locally:
 
@@ -80,7 +94,7 @@ Follow these steps to run Pylint check locally:
 
 Run Pylint on all files that are currently tracked by Git in the project.
 ```shell
-pylint $(git ls-files '*.py')
+pylint --ignore=tests $(git ls-files '*.py')
 ```
 
 To run Pylint on a specific file, follow the pattern `pylint <path_to_file>/<name_of_file>.py`.
@@ -108,9 +122,9 @@ This project uses the [Black](https://github.com/psf/black) tool for code format
 Black aims for consistency, generality, readability and reducing git diffs.
 The coding style used can be viewed as a strict subset of PEP 8.
 
-The root project file `pyproject.toml` defines the Black tool configuration.
-In this project we are accept a line length of 120 characters.
-We also exclude the `tests/` files from black formatting.
+The `pyproject.toml` file defines the Black configuration.
+In this project, we enforce a maximum line length of 120 characters.
+We also exclude the `tests/` directory from formatting.
 
 Follow these steps to format your code with Black locally:
 
@@ -120,7 +134,7 @@ Follow these steps to format your code with Black locally:
 
 Run Black on all files that are currently tracked by Git in the project.
 ```shell
-black $(git ls-files '*.py')
+black --exclude tests $(git ls-files '*.py')
 ```
 
 To run Black on a specific file, follow the pattern `black <path_to_file>/<name_of_file>.py`.
@@ -133,7 +147,7 @@ black ./version_tag_check/version_tag_check_action.py
 ### Expected Output
 
 This is an example of the expected console output after running the tool:
-```
+```console
 All done! ✨ 🍰 ✨
 1 file reformatted.
 ```
@@ -149,9 +163,7 @@ tool which is a static type checker for Python.
 > With mypy, add type hints (PEP 484) to your Python programs, 
 > and mypy will warn you when you use those types incorrectly.
 
-mypy configuration is in `pyproject.toml` file.
-
-Follow these steps to format your code with my[py] locally:
+The mypy configuration is in the `pyproject.toml` file.
 
 ### Run my[py]
 
@@ -170,7 +182,7 @@ Example:
 ### Expected Output
 
 This is an example of the expected console output after running the tool:
-```
+```console
 Success: no issues found in 1 source file
 ```
 
@@ -187,7 +199,7 @@ pytest tests/
 You can modify the directory to control the level of detail or granularity as per your needs.
 
 ---
-## Check Coverage with pytest-cov
+## Code Coverage with pytest-cov
 
 This project uses the [pytest-cov](https://pypi.org/project/pytest-cov/) plugin to generate test coverage reports.
 The objective of the project is to achieve a minimum score of 80 %. We do exclude the `tests/` file from the coverage report.
