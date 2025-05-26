@@ -19,7 +19,7 @@ This action is designed to help maintainers and contributors ensure that version
 - Incorrect version sequences
 - Non-standard version formats
 
-**Action provides two possible regimes, controlled by the `should-exist` flag:**
+**The action provides two possible regimes, controlled by the `should-exist` flag:**
 - If `should-exist=false` (default): the action checks that the version tag is a valid increment of the latest existing version.
 - If `should-exist=true`: the action checks that the specified tag **already exists** in the repository (and skips increment checks).
 

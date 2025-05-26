@@ -1,4 +1,4 @@
-# Living Documentation Generator - for Developers
+# Version Tag Checker Developer Guide
 
 - [Project Setup](#project-setup)
 - [Run Scripts Locally](#run-scripts-locally)
@@ -30,7 +30,7 @@ pip install -r requirements.txt
 ---
 ## Run Scripts Locally
 
-Create *.sh file and place it in the project root.
+Create a *.sh file and place it in the project root.
 
 ```bash
 #!/bin/bash
@@ -55,7 +55,7 @@ fi
 # Set necessary environment variables
 export INPUT_GITHUB_TOKEN="$GITHUB_TOKEN"
 export INPUT_VERSION_TAG="v1.2.3"
-export INPUT_GITHUB_REPOSITORY="AbsaOSS/generate-release-notes"
+export INPUT_GITHUB_REPOSITORY="AbsaOSS/version-tag-check"
 
 # Run the main script
 python main.py
@@ -93,7 +93,7 @@ pylint ./version_tag_check/version_tag_check_action.py
 ### Expected Output
 
 This is an example of the expected console output after running the tool:
-```
+```console
 ************* Module main
 main.py:30:0: C0116: Missing function or method docstring (missing-function-docstring)
 
@@ -149,7 +149,7 @@ tool which is a static type checker for Python.
 > With mypy, add type hints (PEP 484) to your Python programs, 
 > and mypy will warn you when you use those types incorrectly.
 
-my[py] configuration is in `pyptoject.toml` file.
+mypy configuration is in `pyproject.toml` file.
 
 Follow these steps to format your code with my[py] locally:
 
@@ -164,7 +164,7 @@ To run my[py] check on a specific file, follow the pattern `mypy <path_to_file>/
 
 Example:
 ```shell
-   mypy living_documentation_regime/living_documentation_generator.py
+   mypy version_tag_check/version_tag_check_action.py
 ``` 
 
 ### Expected Output
