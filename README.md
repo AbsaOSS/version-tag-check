@@ -4,12 +4,7 @@
 - [Requirements](#requirements)
 - [Inputs](#inputs)
 - [Usage](#usage)
-- [Running Static Code Analysis](#running-static-code-analysis)
-- [Run Black Tool Locally](#run-black-tool-locally)
-- [Run mypy Tool Locally](#run-mypy-tool-locally)
-- [Running Unit Test](#running-unit-test)
-- [Code Coverage](#code-coverage)
-- [Run Action Locally](#run-action-locally)
+- [Developer Guide](#developer-guide)
 - [Contribution Guidelines](#contribution-guidelines)
 - [License Information](#license-information)
 - [Contact or Support Information](#contact-or-support-information)
@@ -24,19 +19,15 @@ This action is designed to help maintainers and contributors ensure that version
 - Incorrect version sequences
 - Non-standard version formats
 
-**Action provides two possible regimes (based on `should-exist` flag):**
-- check that the version tag is an increment of an exiting one (`should-exist=false`, default)
-- check that the version tag is present in the repository (`should-exist=true`)
+**The action provides two possible regimes, controlled by the `should-exist` flag:**
+- If `should-exist=false` (default): the action checks that the version tag is a valid increment of the latest existing version.
+- If `should-exist=true`: the action checks that the specified tag **already exists** in the repository (and skips increment checks).
 
 ## Requirements
 - **GitHub Token**: A GitHub token with permission to fetch repository data such as Issues and Pull Requests.
 - **Python 3.11+**: Ensure you have Python 3.11 installed on your system.
 
 ## Inputs
-
-### `GITHUB_TOKEN`
-- **Description**: Your GitHub token for authentication. Store it as a secret and reference it in the workflow file as secrets.GITHUB_TOKEN.
-- **Required**: Yes
 
 ### `github-repository`
 - **Description**: The GitHub repository to check for version tags. Example: `AbsaOSS/version-tag-check`.
@@ -47,27 +38,31 @@ This action is designed to help maintainers and contributors ensure that version
 - **Required**: Yes
 
 ### `should-exist`
-- **Description**: Flag to indicate if the version tag should exist in the repository. Set to `true` to check if the version tag should exist. Setting to `true` disables increment validity check. 
+- **Description**: Flag to indicate if the version tag should exist in the repository. Set to `true` to check if the version tag should exist. **Note:** Setting this to `true` **disables** the increment validity check.
+
 - **Default**: `false`
 - **Required**: No
 
+### `GITHUB_TOKEN`
+- **Description**: Your GitHub token for authentication. Store it as a secret and reference it in the workflow file as secrets.GITHUB_TOKEN.
+- **Required**: Yes
+
 ### Behavior Summary
 
-Depending on the combination of these inputs, the action behaves slightly differently. 
-The action checks
-- **1st check:** checks the received tag format (semantic version prefixed by a `v`)
-- **2nd check:** checks tag presence in the target git repository
-  - _Note:_ `should-exist` flag determines the expected presence of the tag in the repository
-- **3rd check:** checks if the tag version is a valid increment of a previous version 
-   - _Note:_ This check is *not executed** when `should-exist` is set to `true`. 
+The action performs three sequential checks:
 
-| Tag present in repository (2nd check) | Expected presence of tag in repository | Increment Validity Check (3rd check) | Action final state                                                             |
-|---------------------------------------|----------------------------------------|--------------------------------------|---------------------------------------------------------------------------------|
-| **Yes**                               | `true`                                 | Skipped                              | ✅ **Success**: The version tag exists as expected.                              |
-| **No**                                | `true`                                 | Skipped                              | ❌ **Failure**: The version tag does not exist in the repository.                |
-| **Yes**                               | `false`                                | Skipped                              | ❌ **Failure**: The version tag should not exist but does.                       |
-| **No**                                | `false`                                | Performed                            | ✅ **Success**: The version tag does not exist and is a valid increment.         |
-| **No**                                | `false`                                | Performed                            | ❌ **Failure**: The version tag does not exist and is **not** a valid increment. |
+- **Tag format check** – ensures the tag follows semantic versioning and starts with `v`, e.g., `v1.2.3`.
+- **Presence check** – determines whether the version tag is present in the target GitHub repository.
+- **Increment check** – verifies that the provided version tag is a valid increment over the latest existing version.
+  - ⚠️ This step is **only performed** when `should-exist=false`.
+
+| Tag present in repository (2nd check) | Expected presence of tag in repository | Increment Validity Check (3rd check) | Action final state                                                         |
+|---------------------------------------|----------------------------------------|--------------------------------------|----------------------------------------------------------------------------|
+| **Yes**                               | `true`                                 | *Skipped*                            | ✅ **Success**: The version tag exists as expected.                         |
+| **No**                                | `true`                                 | *Skipped*                            | ❌ **Failure**: The version tag does not exist in the repository.           |
+| **Yes**                               | `false`                                | *Skipped*                            | ❌ **Failure**: The version tag should not exist but does.                  |
+| **No**                                | `false`                                | ✅ *Valid*                            | ✅ **Success**: The version tag does not exist and is a valid increment.    |
+| **No**                                | `false`                                | ❌ *Invalid*                          | ❌ **Failure**: The version tag does not exist and is an **invalid** increment. |
 
 ## Usage
 
@@ -91,6 +86,8 @@ See the default action step definition:
     should-exist: "false"
 ```
 
+> To troubleshoot a failing run, re-run the GitHub Actions workflow with "debug logging" enabled or run it locally using the script described in [Developer Guide](DEVELOPER.md).
+
 ### Supported Version Tags Formats
 - `v1.0.0`
 
@@ -105,165 +102,10 @@ See the default action step definition:
 - `v1.0.0-SNAPSHOT` < `v1.0.0-RC1` < `v1.0.0-RC2` < `v1.0.0-RELEASE` < `v1.0.0-HF1` < `v1.0.0-HF2`
 - `v1.0.0-ALPHA` < `v1.0.0-BETA`
 
-## Running Static Code Analysis
+## Developer Guide
 
-This project uses Pylint tool for static code analysis. Pylint analyses your code without actually running it. It checks for errors, enforces, coding standards, looks for code smells etc.
+See this [Developer Guide](DEVELOPER.md) for more technical, development-related information.
 
-Pylint displays a global evaluation score for the code, rated out of a maximum score of 10.0. We are aiming to keep our code quality high above the score 9.5.
-
-### Set Up Python Environment
-```shell
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-This command will also install a Pylint tool, since it is listed in the project requirements.
-
-### Run Pylint
-Run Pylint on all files that are currently tracked by Git in the project.
-```shell
-pylint $(git ls-files '*.py')
-```
-
-To run Pylint on a specific file, follow the pattern `pylint <path_to_file>/<name_of_file>.py`.
-
-Example:
-```shell
-pylint ./version_tag_check/version_tag_check_action.py
-``` 
-
-## Run Black Tool Locally
-This project uses the [Black](https://github.com/psf/black) tool for code formatting.
-Black aims for consistency, generality, readability and reducing git diffs.
-The coding style used can be viewed as a strict subset of PEP 8.
-
-The project root file `pyproject.toml` defines the Black tool configuration.
-In this project we are accepting the line length of 120 characters.
-
-Follow these steps to format your code with Black locally:
-
-### Set Up Python Environment
-From terminal in the root of the project, run the following command:
-
-```shell
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-This command will also install a Black tool, since it is listed in the project requirements.
-
-### Run Black
-Run Black on all files that are currently tracked by Git in the project.
-```shell
-black $(git ls-files '*.py')
-```
-
-To run Black on a specific file, follow the pattern `black <path_to_file>/<name_of_file>.py`.
-
-Example:
-```shell
-black ./version_tag_check/version_tag_check_action.py
-``` 
-
-### Expected Output
-This is the console expected output example after running the tool:
-```
-All done! ✨ 🍰 ✨
-1 file reformatted.
-```
-
-## Run mypy Tool Locally
-
-This project uses the [my[py]](https://mypy.readthedocs.io/en/stable/)
-tool which is a static type checker for Python.
-
-> Type checkers help ensure that you’re using variables and functions in your code correctly.
-> With mypy, add type hints (PEP 484) to your Python programs,
-> and mypy will warn you when you use those types incorrectly.
-my[py] configuration is in `pyproject.toml` file.
-
-Follow these steps to format your code with my[py] locally:
-
-### Run my[py]
-
-Run my[py] on all files in the project.
-```shell
-  mypy .
-```
-
-To run my[py] check on a specific file, follow the pattern `mypy <path_to_file>/<name_of_file>.py --check-untyped-defs`.
-
-Example:
-```shell
-   mypy living_documentation_regime/living_documentation_generator.py
-``` 
-
-### Expected Output
-
-This is the console expected output example after running the tool:
-```
-Success: no issues found in 1 source file
-```
-
-## Running Unit Test
-
-Unit tests are written using pytest. To run the tests, use the following command:
-
-```shell
-pytest tests/
-```
-
-This will execute all tests located in the tests directory.
-
-## Code Coverage
-
-Code coverage is collected using pytest-cov coverage tool. To run the tests and collect coverage information, use the following command:
-
-```shell
-pytest --cov=. -v tests/ --cov-fail-under=80
-```
-
-This will execute all tests located in the tests directory and generate a code coverage report.
-
-See the coverage report on the path:
-
-```shell
-open htmlcov/index.html
-```
-
-## Run Action Locally
-Create *.sh file and place it in the project root.
-
-```bash
-#!/bin/bash
-
-# Ensure that Python virtual environment is activated
-if [ ! -d ".venv" ]; then
-  echo "Python virtual environment not found. Creating one..."
-  python3 -m venv .venv
-fi
-
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Check if GITHUB_TOKEN is set
-if [ -z "$GITHUB_TOKEN" ]; then
-  echo "Error: GITHUB_TOKEN environment variable is not set."
-  exit 1
-fi
-
-# Set necessary environment variables
-export INPUT_GITHUB_TOKEN="$GITHUB_TOKEN"
-export INPUT_VERSION_TAG="v1.2.3"
-export INPUT_GITHUB_REPOSITORY="AbsaOSS/generate-release-notes"
-
-# Run the main script
-python main.py
-```
 
 ## Contribution Guidelines
 
