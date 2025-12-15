@@ -337,10 +337,10 @@ Ensure all new code meets project quality standards.
 Update README.md to document the new qualifier support feature.
 
 **Requirements:**
-- Update "Supported Version Tags Formats" section (lines 92-100)
+- Update "Supported Version Tags Formats" section
   - Move planned formats to actual supported formats
   - Document all six qualifier types
-- Update "Support Version Weight Comparison" section (lines 101-104)
+- Update "Support Version Weight Comparison" section
   - Document qualifier precedence rules
   - Show example comparisons with qualifiers
 - Add examples section showing common version progressions
