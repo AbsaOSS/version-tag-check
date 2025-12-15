@@ -59,7 +59,7 @@ Create a validator to check if a qualifier matches the allowed patterns.
   - `BETA`: exactly `BETA`
   - `RC([1-9][0-9]?)`: `RC` followed by 1-2 digits (RC1 to RC99)
   - `RELEASE`: exactly `RELEASE`
-  - `HF[0-9]{1,2}`: `HF` followed by 1-2 digits (HF1 to HF99)
+  - `HF([1-9][0-9]?)`: `HF` followed by 1-2 digits (HF1 to HF99)
 - Add method to validate qualifier against allowed patterns
 - Generate clear error messages for invalid qualifiers
 
