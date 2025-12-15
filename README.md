@@ -5,6 +5,7 @@
 - [Inputs](#inputs)
 - [Usage](#usage)
 - [Developer Guide](#developer-guide)
+
 - [Contribution Guidelines](#contribution-guidelines)
 - [License Information](#license-information)
 - [Contact or Support Information](#contact-or-support-information)
@@ -106,6 +107,9 @@ See the default action step definition:
 
 See this [Developer Guide](DEVELOPER.md) for more technical, development-related information.
 
+## Documentation
+
+- [Version qualifier validation specification](docs/qualifier-spec.md) – defines the supported version tag format, allowed qualifiers, precedence rules, and validation behavior used by this action.
 
 ## Contribution Guidelines
 
