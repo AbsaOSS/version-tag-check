@@ -100,7 +100,7 @@ Implement the precedence rules for comparing versions with the same numeric base
   5. `RELEASE`
   6. No qualifier (highest for that numeric base)
 - Implement special handling for `HF` qualifiers:
-  - `v` < `v-HF1` < `v-HF2` < ... < `v-HF99`
+  - `v1.0.0` < `v1.0.0-HF1` < `v1.0.0-HF2` < ... < `v1.0.0-HF99`
   - HF qualifiers come **after** the bare version
 - Add helper method to extract numeric suffix from RC and HF qualifiers
 
@@ -372,7 +372,7 @@ Numeric versions always take precedence:
 - README clearly documents all supported qualifier formats
 - README shows qualifier precedence rules
 - Examples are clear and helpful
-- Links to `docs/qualifier-spec.md` are present (already exists at line 112)
+- Links to `docs/qualifier-spec.md` are present (already exists in the Documentation section)
 - Documentation is consistent with the specification
 
 ---
