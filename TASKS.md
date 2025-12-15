@@ -68,7 +68,7 @@ Create a validator to check if a qualifier matches the allowed patterns.
 - `RC1`, `RC2`, `RC99` validate successfully
 - `HF1`, `HF2`, `HF99` validate successfully
 - `snapshot`, `alpha`, `rc1`, `hf1` (lowercase) are rejected
-- `RC`, `RC001`, `HF`, `HF001` are rejected
+- `RC`, `RC0`, `RC001`, `HF`, `HF0`, `HF001` are rejected
 - `RC1-SNAPSHOT`, `BETA1`, `UNKNOWN` are rejected
 - Error messages clearly indicate what's wrong with the qualifier
 
