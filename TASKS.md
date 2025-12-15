@@ -237,7 +237,7 @@ Create comprehensive unit tests covering all spec requirements.
 - Test all invalid qualifier formats from spec section 5.2
 - Test all precedence rules from spec section 4
 - Test all sequence validation rules from spec section 6
-- Achieve ≥80% code coverage for modified code
+- Maintain overall project coverage at ≥80%
 - Ensure tests check exact error messages where specified
 
 **Test Categories:**
