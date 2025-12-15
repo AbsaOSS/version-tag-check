@@ -24,6 +24,7 @@ Enhance the `Version` class in `version_tag_check/version.py` to parse and store
 
 **Requirements:**
 - Update `VERSION_REGEX` to capture optional qualifier: `^v(\d+)\.(\d+)\.(\d+)(?:-([A-Z0-9]+))?$`
+  - Note: The qualifier pattern `[A-Z0-9]+` is intentionally permissive to allow parsing of any potential qualifier. Strict validation of allowed qualifier formats will be implemented in Task 1.2.
 - Add private `__qualifier` attribute to store parsed qualifier
 - Add public `qualifier` property to access the qualifier
 - Update `__parse()` method to extract and validate qualifier format
