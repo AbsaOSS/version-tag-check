@@ -50,6 +50,9 @@ File overview
 - version_tag_check/github_repository.py: GitHub API wrapper
 - version_tag_check/utils/: helpers including gh_action and logging_config
 
+Review rules
+- See `.github/copilot-review-rules.md` for default and double-check review expectations.
+
 Common commands
 - Create and activate venv, install deps:
   - python3 -m venv .venv

@@ -8,6 +8,7 @@
 - [Run Unit Tests with Pytest](#run-unit-tests-with-pytest)
 - [Code Coverage with pytest-cov](#code-coverage-with-pytest-cov)
 - [Releasing](#releasing)
+- [Development Flow with GitHub Copilot](#development-flow-with-github-copilot)
 
 ## Project Setup
 
@@ -224,3 +225,119 @@ This project uses GitHub Actions for deployment draft creation. The deployment p
 - **Create a new draft release**: The workflow creates a new draft release in the repository.
 - **Finalize the release draft**: Edit the draft release to add a title, description, and any other necessary details related to the GitHub Action.
 - **Publish the release**: Once the draft is ready, publish the release to make it publicly available.
+
+---
+## Development Flow with GitHub Copilot
+
+This repository is configured to use GitHub Copilot in three main ways:
+
+- GitHub Codespaces / GitHub web UI – PR‑centric, great for reviews and quick changes.
+- Local IDE (VS Code) – day‑to‑day coding, navigation and refactoring.
+- Web Copilot at https://github.com/copilot – repo‑aware chat in the browser.
+
+All flows rely on:
+
+- `.github/copilot-instructions.md` – repo‑specific context and coding rules.
+- `.github/copilot-review-rules.md` – expectations for default and double‑check reviews.
+- Optional agent profiles.
+
+### Common Preparation
+
+Before you start, make sure you:
+
+1. Have read `.github/copilot-instructions.md` and `.github/copilot-review-rules.md`.
+2. Use `SPEC.md` and `TASKS.md` for any non‑trivial feature.
+3. Know which agent to use for the activity (planning, coding, testing, review).
+
+---
+
+### Flow A – GitHub / Codespaces Chat
+
+Use this flow when you:
+
+- Work directly in a GitHub Codespace.
+- Do planning, code review or small fixes from the browser.
+
+**Typical steps**
+
+1. **Open context**
+
+   - Open the relevant PR, issue, or file in GitHub / Codespaces.
+   - Start a Copilot chat in the Codespace.
+
+2. **Plan with agents (optional)**
+
+   - For epics or larger changes:
+     ```markdown
+     @copilot (Architect agent) Based on this issue and SPEC.md, outline a 3–5 step plan.
+     ```
+
+3. **Implement small changes**
+
+   ```markdown
+   @copilot Using .github/copilot-instructions.md, update this file to satisfy TASKS.md item 2.
+
+---
+### Flow B – Local IDE (VS Code) Chat
+
+Use this flow for everyday development on your machine.
+
+**Typical steps**
+
+1. Start from SPEC/TASKS
+    ```
+    @copilot Here is SPEC.md and TASKS.md. Help me implement tasks one by one, starting from task 1. After each task, propose tests before moving on.
+    ```
+
+2. Choose the right agent
+    - Planning → Architect / BA / PM agent.
+    - Coding help → Junior Dev or Senior Dev agent.
+    - Test design → Tester / Test Automation agent.
+
+3. Implement + test in small loops
+    - Implement one task.
+    - Run tests locally and fix issues.
+    - Commit when green.
+
+4. Prepare PR and push
+    - Keep PRs small and focused.
+    - Link SPEC/TASKS and issues in the PR description.
+
+5. Use Copilot review in GitHub
+    - Then follow Flow A’s review steps.
+
+---
+### Flow C – Web Copilot (github.com/copilot)
+
+Use this flow when you:
+- Are away from your IDE or Codespace.
+- Want to explore ideas, refactor plans, or multi‑repo questions.
+- Need help understanding existing code or architecture before changing it.
+
+**Typical steps**
+
+1. Open Web Copilot
+    - Go to https://github.com/copilot and start a new chat.
+    - If needed, point Copilot at this repository (by link or name).
+2. Explore or clarify before coding
+    - Examples:
+      ```markdown
+      I’m working on <feature> in <repo>. Here is SPEC.md and TASKS.md.
+      Summarise the current design and suggest any risky areas to watch.
+      ```
+      ```markdown
+      Show me how version-tag-check validates tags today and where tests live.
+      Propose a safe way to extend it for pre-release tags.
+      ```
+3. Design and planning with agents
+    - Use role agents (Architect, BA, PM, Tester) from the web UI if available in your plan.
+    - Keep the conversation focused on:
+      - Clarifying requirements and edge cases.
+      - Proposing plans and test strategies.
+      - Generating drafts for SPEC/TASKS or docs.
+4. Hand off to IDE or Codespace
+    - Once you have a plan or code snippets:
+      - Copy relevant parts into local files or a branch in a Codespace.
+      - Continue implementation using Flow A or Flow B.
+
+Web Copilot is best for thinking and exploration; final implementation, tests, and reviews should still happen in the IDE/Codespace flows.
