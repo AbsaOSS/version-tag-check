@@ -32,13 +32,13 @@ class Version:
     Class to represent a version and compare it to other versions.
     """
 
-    VERSION_REGEX = r"^v(\d+)\.(\d+)\.(\d+)$"
+    VERSION_REGEX = r"^v(\d+)\.(\d+)\.(\d+)(?:-([A-Z0-9]+))?$"
 
     def __init__(self, version_str: str, version_regex: str = VERSION_REGEX) -> None:
         """
         Initialize the Version with the version string.
 
-        @param version_str: The version string in the format "vX.Y.Z"
+        @param version_str: The version string in the format "vX.Y.Z" or "vX.Y.Z-QUALIFIER"
         @return: None
         """
         self.__version_regex = version_regex
@@ -46,6 +46,7 @@ class Version:
         self.__major: Optional[int] = None
         self.__minor: Optional[int] = None
         self.__patch: Optional[int] = None
+        self.__qualifier: Optional[str] = None
         self.__valid: Optional[bool] = None
 
         self.__parse(version_str)
@@ -77,15 +78,26 @@ class Version:
         """
         return self.__patch
 
+    @property
+    def qualifier(self) -> Optional[str]:
+        """
+        Get the qualifier.
+
+        @return: The qualifier string, or None if no qualifier is present
+        """
+        return self.__qualifier
+
     def __parse(self, version_str: str) -> None:
         """
-        Parse the version string into major, minor and patch.
+        Parse the version string into major, minor, patch, and optional qualifier.
 
         @return: None
         """
         match = re.match(self.__version_regex, version_str)
         if match:
-            self.__major, self.__minor, self.__patch = map(int, match.groups())
+            groups = match.groups()
+            self.__major, self.__minor, self.__patch = map(int, groups[:3])
+            self.__qualifier = groups[3] if len(groups) > 3 else None
             self.__valid = True
             logger.info("Version '%s' parsed successfully.", version_str)
         else:
@@ -99,6 +111,35 @@ class Version:
         @return: True if the version string is in the correct format, False otherwise
         """
         return self.__valid if self.__valid is not None else False
+
+    def is_valid_qualifier(self) -> tuple[bool, Optional[str]]:
+        """
+        Validate if the qualifier matches allowed patterns.
+
+        @return: A tuple of (is_valid, error_message)
+        """
+        if self.__qualifier is None:
+            return True, None
+
+        # Allowed qualifier patterns
+        qualifier_patterns = {
+            "SNAPSHOT": r"^SNAPSHOT$",
+            "ALPHA": r"^ALPHA$",
+            "BETA": r"^BETA$",
+            "RC": r"^RC([1-9][0-9]?)$",  # RC1 to RC99
+            "RELEASE": r"^RELEASE$",
+            "HF": r"^HF([1-9][0-9]?)$",  # HF1 to HF99
+        }
+
+        # Check each pattern
+        for pattern_name, pattern in qualifier_patterns.items():
+            if re.match(pattern, self.__qualifier):
+                return True, None
+
+        # If no pattern matched, generate a helpful error message
+        error_msg = f"Invalid qualifier '{self.__qualifier}'. "
+        error_msg += "Allowed qualifiers are: SNAPSHOT, ALPHA, BETA, RC1-RC99, RELEASE, HF1-HF99"
+        return False, error_msg
 
     def __eq__(self, other) -> bool:
         """
@@ -156,4 +197,8 @@ class Version:
         major = self.major if self.major is not None else placeholder
         minor = self.minor if self.minor is not None else placeholder
         patch = self.patch if self.patch is not None else placeholder
-        return f"v{major}.{minor}.{patch}"
+        base = f"v{major}.{minor}.{patch}"
+        
+        if self.qualifier is not None:
+            return f"{base}-{self.qualifier}"
+        return base
