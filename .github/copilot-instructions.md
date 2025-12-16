@@ -41,6 +41,18 @@ Architecture notes
 - Keep Version and NewVersionValidator free of I/O and environment access
 - Route new behaviour that affects action inputs or outputs through VersionTagCheckAction
 
+Pull Request
+When opening a Pull Request, always include a section formatted as follows:
+
+Release Notes:
+- Change number 1
+- Change number 2
+
+Guidelines:
+- Begin the section with the heading `Release Notes:` (including the colon).
+- List each user-facing change as a separate bullet point.
+- Use clear, concise language for each change.
+
 File overview
 - main.py: sets up logging and runs the action
 - action.yml: composite action definition
