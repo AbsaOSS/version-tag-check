@@ -142,7 +142,7 @@ class Version:
         error_msg += "Allowed qualifiers are: SNAPSHOT, ALPHA, BETA, RC1-RC99, RELEASE, HF1-HF99"
         return False, error_msg
 
-    def _get_qualifier_precedence(self) -> tuple[int, int]:  # pylint: disable=too-many-return-statements
+    def get_qualifier_precedence(self) -> tuple[int, int]:  # pylint: disable=too-many-return-statements
         """
         Get the precedence value for the qualifier.
 
@@ -204,7 +204,7 @@ class Version:
             return False
 
         # If numeric components are equal, compare qualifiers
-        return self._get_qualifier_precedence() == other._get_qualifier_precedence()  # pylint: disable=protected-access
+        return self.get_qualifier_precedence() == other.get_qualifier_precedence()
 
     def __lt__(self, other) -> Optional[bool]:
         """
@@ -224,7 +224,7 @@ class Version:
             return (self.major, self.minor, self.patch) < (other.major, other.minor, other.patch)
 
         # If numeric components are equal, compare qualifiers
-        return self._get_qualifier_precedence() < other._get_qualifier_precedence()  # pylint: disable=protected-access
+        return self.get_qualifier_precedence() < other.get_qualifier_precedence()
 
     def __gt__(self, other):
         """
@@ -244,7 +244,7 @@ class Version:
             return (self.major, self.minor, self.patch) > (other.major, other.minor, other.patch)
 
         # If numeric components are equal, compare qualifiers
-        return self._get_qualifier_precedence() > other._get_qualifier_precedence()  # pylint: disable=protected-access
+        return self.get_qualifier_precedence() > other.get_qualifier_precedence()
 
     def __str__(self) -> str:
         """

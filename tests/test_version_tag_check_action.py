@@ -225,6 +225,13 @@ def test_run_successful_with_qualifiers(mocker, version_tag, should_exist, exist
         ("v1.0.0-HF", "Invalid qualifier 'HF'"),
         ("v1.0.0-HF0", "Invalid qualifier 'HF0'"),
         ("v1.0.0-SNAPSHOT1", "Invalid qualifier 'SNAPSHOT1'"),
+        ("v1.0.0-SNAPSHOT2", "Invalid qualifier 'SNAPSHOT2'"),
+        ("v1.0.0-ALPHA1", "Invalid qualifier 'ALPHA1'"),
+        ("v1.0.0-ALPHA2", "Invalid qualifier 'ALPHA2'"),
+        ("v1.0.0-BETA1", "Invalid qualifier 'BETA1'"),
+        ("v1.0.0-BETA2", "Invalid qualifier 'BETA2'"),
+        ("v1.0.0-RELEASE1", "Invalid qualifier 'RELEASE1'"),
+        ("v1.0.0-RELEASE2", "Invalid qualifier 'RELEASE2'"),
     ],
 )
 def test_run_invalid_qualifier(mocker, caplog, version_tag, expected_error):
