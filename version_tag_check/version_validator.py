@@ -69,6 +69,12 @@ class NewVersionValidator:
     def is_valid_increment(self) -> bool:
         """
         Check if the new version is a valid increment from the latest version.
+        
+        Supports:
+        - Qualifier progression within same numeric version
+        - Version bumps (major, minor, patch) with or without qualifiers
+        - Hotfix sequences after release
+        - Backport patches to older version series
 
         @return: True if the new version is a valid increment, False otherwise
         """
@@ -82,6 +88,15 @@ class NewVersionValidator:
 
         nv: Version = self.__new_version
 
+        # If it's the same numeric version as latest, check qualifier progression
+        if (nv.major, nv.minor, nv.patch) == (latest_version.major, latest_version.minor, latest_version.patch):
+            if nv > latest_version:
+                logger.info("Valid qualifier progression: %s -> %s", latest_version, nv)
+                return True
+            logger.error("New tag %s is not greater than the latest tag %s.", nv, latest_version)
+            return False
+        
+        # For different numeric versions, check standard increment rules
         # Filter versions matching the major and minor version of the new version
         filtered_versions = self.__get_filtered_versions(nv.major, nv.minor)
         if len(filtered_versions) > 0:
@@ -91,18 +106,27 @@ class NewVersionValidator:
             # Validate against the latest filtered version
             if nv.major == latest_filtered_version.major and nv.minor == latest_filtered_version.minor:
                 if nv.patch == (latest_filtered_version.patch if latest_filtered_version.patch else 0) + 1:
+                    logger.info("Valid patch increment: %s -> %s", latest_filtered_version, nv)
                     return True
                 logger.error("New tag %s is not one patch higher than the latest tag %s.", nv, latest_filtered_version)
+                # Don't return False here - continue to check if it's a valid minor/major bump
 
-        # Check if this is a valid minor or major bump
-        if nv.major == latest_version.major:
-            if nv.minor == (latest_version.minor if latest_version.minor else 0) + 1:
-                if nv.patch == 0:
+        # Check if this is a valid minor or major bump (only if greater than latest)
+        if nv > latest_version:
+            if nv.major == latest_version.major:
+                if nv.minor == (latest_version.minor if latest_version.minor else 0) + 1:
+                    if nv.patch == 0:
+                        logger.info("Valid minor increment: %s -> %s", latest_version, nv)
+                        return True
+                    logger.error("New tag %s is not a valid minor bump. Latest version: %s.", nv, latest_version)
+                    return False
+            elif nv.major == (latest_version.major if latest_version.major else 0) + 1:
+                if nv.minor == 0 and nv.patch == 0:
+                    logger.info("Valid major increment: %s -> %s", latest_version, nv)
                     return True
-                logger.error("New tag %s is not a valid minor bump. Latest version: %s.", nv, latest_version)
-        elif nv.major == (latest_version.major if latest_version.major else 0) + 1:
-            if nv.minor == 0 and nv.patch == 0:
-                return True
-            logger.error("New tag %s is not a valid major bump. Latest version: %s.", nv, latest_version)
-
+                logger.error("New tag %s is not a valid major bump. Latest version: %s.", nv, latest_version)
+                return False
+        
+        # If new version is not greater than latest and doesn't fit other patterns, it's invalid
+        logger.error("New tag %s is not greater than the latest tag %s.", nv, latest_version)
         return False

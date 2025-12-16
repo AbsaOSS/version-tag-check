@@ -171,3 +171,92 @@ def test_run_unsuccessful(mocker, caplog, version_tag, should_exist, existing_ta
 
     # Assert error message in logs
     assert error_message in caplog.text
+
+
+# Tests for qualifier support
+
+@pytest.mark.parametrize(
+    "version_tag, should_exist, existing_tags",
+    [
+        ("v1.0.0-SNAPSHOT", "false", []),                                        # First version with qualifier
+        ("v1.0.0-ALPHA", "false", [Version("v1.0.0-SNAPSHOT")]),                 # Qualifier progression
+        ("v1.0.0-BETA", "false", [Version("v1.0.0-ALPHA")]),                     # Qualifier progression
+        ("v1.0.0-RC1", "false", [Version("v1.0.0-BETA")]),                       # Qualifier progression
+        ("v1.0.0-RC2", "false", [Version("v1.0.0-RC1")]),                        # RC progression
+        ("v1.0.0-RELEASE", "false", [Version("v1.0.0-RC2")]),                    # Qualifier progression
+        ("v1.0.0", "false", [Version("v1.0.0-RELEASE")]),                        # Release to bare
+        ("v1.0.0-HF1", "false", [Version("v1.0.0")]),                            # Hotfix after release
+        ("v1.0.0-HF2", "false", [Version("v1.0.0-HF1")]),                        # HF progression
+    ],
+)
+def test_run_successful_with_qualifiers(mocker, version_tag, should_exist, existing_tags):
+    """Test that the action handles version tags with valid qualifiers"""
+    # Set environment variables
+    env_vars = {
+        "INPUT_GITHUB_TOKEN": "fake_token",
+        "INPUT_VERSION_TAG": version_tag,
+        "INPUT_GITHUB_REPOSITORY": "owner/repo",
+        "INPUT_SHOULD_EXIST": should_exist,
+    }
+    os.environ.update(env_vars)
+
+    # Mock sys.exit to prevent the test from exiting
+    mock_exit = mocker.patch("sys.exit")
+
+    # Mock the GitHubRepository class
+    mock_repository_class = mocker.patch("version_tag_check.version_tag_check_action.GitHubRepository")
+    mock_repository_instance = mock_repository_class.return_value
+    mock_repository_instance.get_all_tags.return_value = existing_tags
+
+    # Run the action
+    action = VersionTagCheckAction()
+    action.run()
+
+    mock_exit.assert_called_once_with(0)
+
+
+@pytest.mark.parametrize(
+    "version_tag, expected_error",
+    [
+        ("v1.0.0-UNKNOWN", "Invalid qualifier 'UNKNOWN'"),
+        ("v1.0.0-RC", "Invalid qualifier 'RC'"),
+        ("v1.0.0-RC0", "Invalid qualifier 'RC0'"),
+        ("v1.0.0-RC100", "Invalid qualifier 'RC100'"),
+        ("v1.0.0-HF", "Invalid qualifier 'HF'"),
+        ("v1.0.0-HF0", "Invalid qualifier 'HF0'"),
+        ("v1.0.0-SNAPSHOT1", "Invalid qualifier 'SNAPSHOT1'"),
+    ],
+)
+def test_run_invalid_qualifier(mocker, caplog, version_tag, expected_error):
+    """Test that the action rejects version tags with invalid qualifiers"""
+    # Set environment variables
+    env_vars = {
+        "INPUT_GITHUB_TOKEN": "fake_token",
+        "INPUT_VERSION_TAG": version_tag,
+        "INPUT_GITHUB_REPOSITORY": "owner/repo",
+        "INPUT_SHOULD_EXIST": "false",
+    }
+    os.environ.update(env_vars)
+
+    # Mock sys.exit to raise a SystemExit for assertion
+    def mock_exit(code):
+        raise SystemExit(code)
+
+    mocker.patch("sys.exit", mock_exit)
+
+    # Mock the GitHubRepository class (won't be called due to early failure)
+    mock_repository_class = mocker.patch("version_tag_check.version_tag_check_action.GitHubRepository")
+    mock_repository_instance = mock_repository_class.return_value
+    mock_repository_instance.get_all_tags.return_value = []
+
+    # Run the action
+    caplog.set_level(logging.ERROR)
+    action = VersionTagCheckAction()
+    with pytest.raises(SystemExit) as e:
+        action.run()
+
+    # Assert sys.exit was called with code 1
+    assert e.value.code == 1
+
+    # Assert error message in logs
+    assert expected_error in caplog.text
