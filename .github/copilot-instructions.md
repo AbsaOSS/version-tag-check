@@ -42,7 +42,7 @@ Architecture notes
 - Route new behaviour that affects action inputs or outputs through VersionTagCheckAction
 
 Pull Request
-When opening a Pull Request, always include a section formatted as follows:
+- When opening a Pull Request, always include a section formatted as follows:
 
 Release Notes:
 - Change number 1
