@@ -141,6 +141,50 @@ class Version:
         error_msg += "Allowed qualifiers are: SNAPSHOT, ALPHA, BETA, RC1-RC99, RELEASE, HF1-HF99"
         return False, error_msg
 
+    def __get_qualifier_precedence(self) -> tuple[int, int]:
+        """
+        Get the precedence value for the qualifier.
+        
+        Returns a tuple (category, number) where:
+        - category: the precedence category (0-6)
+        - number: the numeric suffix for RC and HF qualifiers (0 otherwise)
+        
+        Precedence order:
+        0: SNAPSHOT (lowest)
+        1: ALPHA
+        2: BETA
+        3: RC1-RC99
+        4: RELEASE
+        5: No qualifier (bare version)
+        6: HF1-HF99 (highest)
+        
+        @return: A tuple of (category, number)
+        """
+        if self.__qualifier is None:
+            return (5, 0)  # No qualifier - between RELEASE and HF
+        
+        if self.__qualifier == "SNAPSHOT":
+            return (0, 0)
+        if self.__qualifier == "ALPHA":
+            return (1, 0)
+        if self.__qualifier == "BETA":
+            return (2, 0)
+        if self.__qualifier == "RELEASE":
+            return (4, 0)
+        
+        # Handle RC with numeric suffix
+        rc_match = re.match(r"^RC(\d+)$", self.__qualifier)
+        if rc_match:
+            return (3, int(rc_match.group(1)))
+        
+        # Handle HF with numeric suffix
+        hf_match = re.match(r"^HF(\d+)$", self.__qualifier)
+        if hf_match:
+            return (6, int(hf_match.group(1)))
+        
+        # Invalid qualifier - return lowest precedence
+        return (-1, 0)
+
     def __eq__(self, other) -> bool:
         """
         Compare the Version to another Version.
@@ -154,7 +198,12 @@ class Version:
         if not self.is_valid_format() or not other.is_valid_format():
             return False
 
-        return (self.major, self.minor, self.patch) == (other.major, other.minor, other.patch)
+        # Compare numeric components first
+        if (self.major, self.minor, self.patch) != (other.major, other.minor, other.patch):
+            return False
+        
+        # If numeric components are equal, compare qualifiers
+        return self.__get_qualifier_precedence() == other.__get_qualifier_precedence()
 
     def __lt__(self, other) -> Optional[bool]:
         """
@@ -169,7 +218,12 @@ class Version:
         if not self.is_valid_format() or not other.is_valid_format():
             return False
 
-        return (self.major, self.minor, self.patch) < (other.major, other.minor, other.patch)
+        # Compare numeric components first
+        if (self.major, self.minor, self.patch) != (other.major, other.minor, other.patch):
+            return (self.major, self.minor, self.patch) < (other.major, other.minor, other.patch)
+        
+        # If numeric components are equal, compare qualifiers
+        return self.__get_qualifier_precedence() < other.__get_qualifier_precedence()
 
     def __gt__(self, other):
         """
@@ -184,7 +238,12 @@ class Version:
         if not self.is_valid_format() or not other.is_valid_format():
             return False
 
-        return (self.major, self.minor, self.patch) > (other.major, other.minor, other.patch)
+        # Compare numeric components first
+        if (self.major, self.minor, self.patch) != (other.major, other.minor, other.patch):
+            return (self.major, self.minor, self.patch) > (other.major, other.minor, other.patch)
+        
+        # If numeric components are equal, compare qualifiers
+        return self.__get_qualifier_precedence() > other.__get_qualifier_precedence()
 
     def __str__(self) -> str:
         """

@@ -445,3 +445,147 @@ def test_validate_qualifier_unknown_invalid():
     
     assert is_valid is False
     assert "Invalid qualifier 'UNKNOWN'" in error
+
+
+# Qualifier comparison tests
+
+def test_comparison_numeric_precedence_over_qualifier():
+    """Test that numeric version takes precedence over qualifiers"""
+    v1 = Version("v2.0.0-SNAPSHOT")
+    v2 = Version("v1.9.9-RELEASE")
+    
+    assert v1 > v2
+    assert v2 < v1
+    assert not v1 == v2
+
+
+def test_comparison_same_numeric_different_qualifiers():
+    """Test qualifier precedence for same numeric version"""
+    snapshot = Version("v1.0.0-SNAPSHOT")
+    alpha = Version("v1.0.0-ALPHA")
+    beta = Version("v1.0.0-BETA")
+    rc1 = Version("v1.0.0-RC1")
+    release = Version("v1.0.0-RELEASE")
+    bare = Version("v1.0.0")
+    hf1 = Version("v1.0.0-HF1")
+    
+    # Test SNAPSHOT < ALPHA < BETA
+    assert snapshot < alpha < beta
+    
+    # Test BETA < RC1
+    assert beta < rc1
+    
+    # Test RC1 < RELEASE
+    assert rc1 < release
+    
+    # Test RELEASE < bare version
+    assert release < bare
+    
+    # Test bare version < HF1
+    assert bare < hf1
+
+
+def test_comparison_rc_numeric_ordering():
+    """Test that RC qualifiers are ordered numerically, not lexically"""
+    rc1 = Version("v1.0.0-RC1")
+    rc2 = Version("v1.0.0-RC2")
+    rc10 = Version("v1.0.0-RC10")
+    
+    assert rc1 < rc2 < rc10
+    assert rc10 > rc2 > rc1
+
+
+def test_comparison_hf_numeric_ordering():
+    """Test that HF qualifiers are ordered numerically, not lexically"""
+    hf1 = Version("v1.0.0-HF1")
+    hf2 = Version("v1.0.0-HF2")
+    hf10 = Version("v1.0.0-HF10")
+    
+    assert hf1 < hf2 < hf10
+    assert hf10 > hf2 > hf1
+
+
+def test_comparison_hotfix_after_bare_version():
+    """Test that hotfix versions come after the bare version"""
+    bare = Version("v1.0.0")
+    hf1 = Version("v1.0.0-HF1")
+    hf2 = Version("v1.0.0-HF2")
+    
+    assert bare < hf1 < hf2
+
+
+def test_comparison_full_progression():
+    """Test the full qualifier progression from spec section 4.2"""
+    versions = [
+        Version("v1.0.0-SNAPSHOT"),
+        Version("v1.0.0-ALPHA"),
+        Version("v1.0.0-BETA"),
+        Version("v1.0.0-RC1"),
+        Version("v1.0.0-RC2"),
+        Version("v1.0.0-RELEASE"),
+        Version("v1.0.0"),
+    ]
+    
+    # Verify each version is less than the next
+    for i in range(len(versions) - 1):
+        assert versions[i] < versions[i + 1], f"{versions[i]} should be < {versions[i + 1]}"
+
+
+def test_comparison_with_hotfixes():
+    """Test version progression including hotfixes"""
+    versions = [
+        Version("v1.0.0-RC1"),
+        Version("v1.0.0-RELEASE"),
+        Version("v1.0.0"),
+        Version("v1.0.0-HF1"),
+        Version("v1.0.0-HF2"),
+    ]
+    
+    # Verify each version is less than the next
+    for i in range(len(versions) - 1):
+        assert versions[i] < versions[i + 1], f"{versions[i]} should be < {versions[i + 1]}"
+
+
+def test_comparison_equality_with_qualifiers():
+    """Test equality comparison with qualifiers"""
+    v1 = Version("v1.0.0-SNAPSHOT")
+    v2 = Version("v1.0.0-SNAPSHOT")
+    v3 = Version("v1.0.0-ALPHA")
+    
+    assert v1 == v2
+    assert not v1 == v3
+    assert not v2 == v3
+
+
+def test_comparison_equality_bare_versions():
+    """Test that bare versions are still equal"""
+    v1 = Version("v1.0.0")
+    v2 = Version("v1.0.0")
+    
+    assert v1 == v2
+
+
+def test_comparison_cross_version_with_qualifiers():
+    """Test comparisons across different numeric versions with qualifiers"""
+    v1 = Version("v1.0.0-ALPHA")
+    v2 = Version("v1.0.0-BETA")
+    v3 = Version("v1.0.0")
+    v4 = Version("v1.1.0-SNAPSHOT")
+    
+    assert v1 < v2 < v3 < v4
+
+
+def test_comparison_rc99_and_release():
+    """Test boundary condition: RC99 < RELEASE"""
+    rc99 = Version("v1.0.0-RC99")
+    release = Version("v1.0.0-RELEASE")
+    
+    assert rc99 < release
+
+
+def test_comparison_hf99_boundary():
+    """Test boundary condition: HF99 is valid and compares correctly"""
+    hf1 = Version("v1.0.0-HF1")
+    hf99 = Version("v1.0.0-HF99")
+    
+    assert hf1 < hf99
