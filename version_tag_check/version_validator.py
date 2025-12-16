@@ -66,10 +66,10 @@ class NewVersionValidator:
             if (major is None or version.major == major) and (minor is None or version.minor == minor)
         ]
 
-    def is_valid_increment(self) -> bool:
+    def is_valid_increment(self) -> bool:  # pylint: disable=too-many-return-statements
         """
         Check if the new version is a valid increment from the latest version.
-        
+
         Supports:
         - Qualifier progression within same numeric version
         - Version bumps (major, minor, patch) with or without qualifiers
@@ -95,7 +95,7 @@ class NewVersionValidator:
                 return True
             logger.error("New tag %s is not greater than the latest tag %s.", nv, latest_version)
             return False
-        
+
         # For different numeric versions, check standard increment rules
         # Filter versions matching the major and minor version of the new version
         filtered_versions = self.__get_filtered_versions(nv.major, nv.minor)
@@ -126,7 +126,7 @@ class NewVersionValidator:
                     return True
                 logger.error("New tag %s is not a valid major bump. Latest version: %s.", nv, latest_version)
                 return False
-        
+
         # If new version is not greater than latest and doesn't fit other patterns, it's invalid
         logger.error("New tag %s is not greater than the latest tag %s.", nv, latest_version)
         return False

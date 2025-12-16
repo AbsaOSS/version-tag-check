@@ -62,7 +62,8 @@ class VersionTagCheckAction:
         # Validate the qualifier if present
         is_valid_qualifier, qualifier_error = new_version.is_valid_qualifier()
         if not is_valid_qualifier:
-            set_action_failed(qualifier_error)
+            error_msg = qualifier_error if qualifier_error else "Invalid qualifier"
+            set_action_failed(error_msg)
 
         repository: GitHubRepository = GitHubRepository(self.owner, self.repo, self.github_token)
         existing_versions: list[Version] = repository.get_all_tags()

@@ -132,7 +132,7 @@ class Version:
         }
 
         # Check each pattern
-        for pattern_name, pattern in qualifier_patterns.items():
+        for pattern in qualifier_patterns.values():
             if re.match(pattern, self.__qualifier):
                 return True, None
 
@@ -141,14 +141,14 @@ class Version:
         error_msg += "Allowed qualifiers are: SNAPSHOT, ALPHA, BETA, RC1-RC99, RELEASE, HF1-HF99"
         return False, error_msg
 
-    def __get_qualifier_precedence(self) -> tuple[int, int]:
+    def __get_qualifier_precedence(self) -> tuple[int, int]:  # pylint: disable=too-many-return-statements
         """
         Get the precedence value for the qualifier.
-        
+
         Returns a tuple (category, number) where:
         - category: the precedence category (0-6)
         - number: the numeric suffix for RC and HF qualifiers (0 otherwise)
-        
+
         Precedence order:
         0: SNAPSHOT (lowest)
         1: ALPHA
@@ -157,12 +157,12 @@ class Version:
         4: RELEASE
         5: No qualifier (bare version)
         6: HF1-HF99 (highest)
-        
+
         @return: A tuple of (category, number)
         """
         if self.__qualifier is None:
             return (5, 0)  # No qualifier - between RELEASE and HF
-        
+
         if self.__qualifier == "SNAPSHOT":
             return (0, 0)
         if self.__qualifier == "ALPHA":
@@ -171,17 +171,17 @@ class Version:
             return (2, 0)
         if self.__qualifier == "RELEASE":
             return (4, 0)
-        
+
         # Handle RC with numeric suffix
         rc_match = re.match(r"^RC(\d+)$", self.__qualifier)
         if rc_match:
             return (3, int(rc_match.group(1)))
-        
+
         # Handle HF with numeric suffix
         hf_match = re.match(r"^HF(\d+)$", self.__qualifier)
         if hf_match:
             return (6, int(hf_match.group(1)))
-        
+
         # Invalid qualifier - return lowest precedence
         return (-1, 0)
 
@@ -201,9 +201,9 @@ class Version:
         # Compare numeric components first
         if (self.major, self.minor, self.patch) != (other.major, other.minor, other.patch):
             return False
-        
+
         # If numeric components are equal, compare qualifiers
-        return self.__get_qualifier_precedence() == other.__get_qualifier_precedence()
+        return self.__get_qualifier_precedence() == other.__get_qualifier_precedence()  # pylint: disable=protected-access
 
     def __lt__(self, other) -> Optional[bool]:
         """
@@ -221,9 +221,9 @@ class Version:
         # Compare numeric components first
         if (self.major, self.minor, self.patch) != (other.major, other.minor, other.patch):
             return (self.major, self.minor, self.patch) < (other.major, other.minor, other.patch)
-        
+
         # If numeric components are equal, compare qualifiers
-        return self.__get_qualifier_precedence() < other.__get_qualifier_precedence()
+        return self.__get_qualifier_precedence() < other.__get_qualifier_precedence()  # pylint: disable=protected-access
 
     def __gt__(self, other):
         """
@@ -241,9 +241,9 @@ class Version:
         # Compare numeric components first
         if (self.major, self.minor, self.patch) != (other.major, other.minor, other.patch):
             return (self.major, self.minor, self.patch) > (other.major, other.minor, other.patch)
-        
+
         # If numeric components are equal, compare qualifiers
-        return self.__get_qualifier_precedence() > other.__get_qualifier_precedence()
+        return self.__get_qualifier_precedence() > other.__get_qualifier_precedence()  # pylint: disable=protected-access
 
     def __str__(self) -> str:
         """
@@ -257,7 +257,7 @@ class Version:
         minor = self.minor if self.minor is not None else placeholder
         patch = self.patch if self.patch is not None else placeholder
         base = f"v{major}.{minor}.{patch}"
-        
+
         if self.qualifier is not None:
             return f"{base}-{self.qualifier}"
         return base
