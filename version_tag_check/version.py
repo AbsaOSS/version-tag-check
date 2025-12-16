@@ -98,7 +98,7 @@ class Version:
             groups = match.groups()
             self.__major, self.__minor, self.__patch = map(int, groups[:3])
             # groups[3] is the optional qualifier group; it's None if not matched
-            self.__qualifier = groups[3] if len(groups) > 3 and groups[3] is not None else None
+            self.__qualifier = groups[3]
             self.__valid = True
             logger.info("Version '%s' parsed successfully.", version_str)
         else:
