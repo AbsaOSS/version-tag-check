@@ -97,7 +97,8 @@ class Version:
         if match:
             groups = match.groups()
             self.__major, self.__minor, self.__patch = map(int, groups[:3])
-            self.__qualifier = groups[3] if len(groups) > 3 else None
+            # groups[3] is the optional qualifier group; it's None if not matched
+            self.__qualifier = groups[3] if len(groups) > 3 and groups[3] is not None else None
             self.__valid = True
             logger.info("Version '%s' parsed successfully.", version_str)
         else:
@@ -141,7 +142,7 @@ class Version:
         error_msg += "Allowed qualifiers are: SNAPSHOT, ALPHA, BETA, RC1-RC99, RELEASE, HF1-HF99"
         return False, error_msg
 
-    def __get_qualifier_precedence(self) -> tuple[int, int]:  # pylint: disable=too-many-return-statements
+    def _get_qualifier_precedence(self) -> tuple[int, int]:  # pylint: disable=too-many-return-statements
         """
         Get the precedence value for the qualifier.
 
@@ -203,7 +204,7 @@ class Version:
             return False
 
         # If numeric components are equal, compare qualifiers
-        return self.__get_qualifier_precedence() == other.__get_qualifier_precedence()  # pylint: disable=protected-access
+        return self._get_qualifier_precedence() == other._get_qualifier_precedence()  # pylint: disable=protected-access
 
     def __lt__(self, other) -> Optional[bool]:
         """
@@ -223,7 +224,7 @@ class Version:
             return (self.major, self.minor, self.patch) < (other.major, other.minor, other.patch)
 
         # If numeric components are equal, compare qualifiers
-        return self.__get_qualifier_precedence() < other.__get_qualifier_precedence()  # pylint: disable=protected-access
+        return self._get_qualifier_precedence() < other._get_qualifier_precedence()  # pylint: disable=protected-access
 
     def __gt__(self, other):
         """
@@ -243,7 +244,7 @@ class Version:
             return (self.major, self.minor, self.patch) > (other.major, other.minor, other.patch)
 
         # If numeric components are equal, compare qualifiers
-        return self.__get_qualifier_precedence() > other.__get_qualifier_precedence()  # pylint: disable=protected-access
+        return self._get_qualifier_precedence() > other._get_qualifier_precedence()  # pylint: disable=protected-access
 
     def __str__(self) -> str:
         """
