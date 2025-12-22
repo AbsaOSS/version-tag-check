@@ -49,3 +49,69 @@ def test_is_valid_increment(existing_versions_str, new_version_str, expected):
     validator = NewVersionValidator(new_version, existing_versions)
 
     assert validator.is_valid_increment() == expected
+
+
+# Test cases for qualifier progression
+qualifier_test_cases = [
+    # Valid qualifier progressions within same numeric version
+    (["v1.0.0-SNAPSHOT"], "v1.0.0-ALPHA", True),
+    (["v1.0.0-ALPHA"], "v1.0.0-BETA", True),
+    (["v1.0.0-BETA"], "v1.0.0-RC1", True),
+    (["v1.0.0-RC1"], "v1.0.0-RC2", True),
+    (["v1.0.0-RC2"], "v1.0.0-RELEASE", True),
+    (["v1.0.0-RELEASE"], "v1.0.0", True),
+    (["v1.0.0"], "v1.0.0-HF1", True),
+    (["v1.0.0-HF1"], "v1.0.0-HF2", True),
+    
+    # Invalid backwards qualifier progressions
+    (["v1.0.0-RC2"], "v1.0.0-RC1", False),
+    (["v1.0.0-ALPHA"], "v1.0.0-SNAPSHOT", False),
+    (["v1.0.0"], "v1.0.0-RELEASE", False),
+    (["v1.0.0-HF2"], "v1.0.0-HF1", False),
+    
+    # Cross-version transitions with qualifiers
+    (["v1.0.0"], "v1.0.1-SNAPSHOT", True),
+    (["v1.0.0"], "v1.1.0-SNAPSHOT", True),
+    (["v1.0.0"], "v2.0.0-SNAPSHOT", True),
+    (["v1.0.0-RELEASE"], "v1.0.1-SNAPSHOT", True),
+    
+    # Valid patch increment with qualifier reset
+    (["v1.0.0"], "v1.0.1-ALPHA", True),
+    (["v1.0.0-RELEASE"], "v1.0.1-BETA", True),
+    
+    # Full progression from spec examples
+    (["v1.0.0-SNAPSHOT"], "v1.0.0-ALPHA", True),
+    (["v1.0.0-SNAPSHOT", "v1.0.0-ALPHA"], "v1.0.0-BETA", True),
+    (["v1.0.0-SNAPSHOT", "v1.0.0-ALPHA", "v1.0.0-BETA"], "v1.0.0-RC1", True),
+    (["v1.0.0-SNAPSHOT", "v1.0.0-ALPHA", "v1.0.0-BETA", "v1.0.0-RC1"], "v1.0.0-RC2", True),
+    (["v1.0.0-RC2"], "v1.0.0-RELEASE", True),
+    (["v1.0.0-RELEASE"], "v1.0.0", True),
+    
+    # Hotfix sequence
+    (["v1.0.0-RELEASE", "v1.0.0"], "v1.0.1", True),
+    (["v1.0.0", "v1.0.1"], "v1.0.1-HF1", True),
+    (["v1.0.0", "v1.0.1", "v1.0.1-HF1"], "v1.0.1-HF2", True),
+    
+    # Invalid: skipping qualifiers is still allowed (as long as it increases)
+    (["v1.0.0-SNAPSHOT"], "v1.0.0-RC1", True),  # Valid: RC1 > SNAPSHOT
+    (["v1.0.0-ALPHA"], "v1.0.0", True),  # Valid: bare > ALPHA
+    
+    # Numeric precedence over qualifiers
+    (["v1.0.0-ALPHA"], "v1.0.1-SNAPSHOT", True),  # v1.0.1 > v1.0.0 regardless of qualifiers
+    
+    # RC ordering
+    (["v1.0.0-RC1"], "v1.0.0-RC10", True),  # RC10 > RC1 (numeric comparison)
+    (["v1.0.0-RC10"], "v1.0.0-RC2", False),  # RC2 < RC10
+    
+    # HF ordering  
+    (["v1.0.0-HF1"], "v1.0.0-HF10", True),  # HF10 > HF1 (numeric comparison)
+    (["v1.0.0-HF10"], "v1.0.0-HF2", False),  # HF2 < HF10
+]
+
+@pytest.mark.parametrize("existing_versions_str, new_version_str, expected", qualifier_test_cases)
+def test_is_valid_increment_with_qualifiers(existing_versions_str, new_version_str, expected):
+    existing_versions = [Version(v_str) for v_str in existing_versions_str]
+    new_version = Version(new_version_str)
+    validator = NewVersionValidator(new_version, existing_versions)
+
+    assert validator.is_valid_increment() == expected

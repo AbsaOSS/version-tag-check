@@ -32,13 +32,13 @@ class Version:
     Class to represent a version and compare it to other versions.
     """
 
-    VERSION_REGEX = r"^v(\d+)\.(\d+)\.(\d+)$"
+    VERSION_REGEX = r"^v(\d+)\.(\d+)\.(\d+)(?:-([A-Z0-9]+))?$"
 
     def __init__(self, version_str: str, version_regex: str = VERSION_REGEX) -> None:
         """
         Initialize the Version with the version string.
 
-        @param version_str: The version string in the format "vX.Y.Z"
+        @param version_str: The version string in the format "vX.Y.Z" or "vX.Y.Z-QUALIFIER"
         @return: None
         """
         self.__version_regex = version_regex
@@ -46,6 +46,7 @@ class Version:
         self.__major: Optional[int] = None
         self.__minor: Optional[int] = None
         self.__patch: Optional[int] = None
+        self.__qualifier: Optional[str] = None
         self.__valid: Optional[bool] = None
 
         self.__parse(version_str)
@@ -77,15 +78,27 @@ class Version:
         """
         return self.__patch
 
+    @property
+    def qualifier(self) -> Optional[str]:
+        """
+        Get the qualifier.
+
+        @return: The qualifier string, or None if no qualifier is present
+        """
+        return self.__qualifier
+
     def __parse(self, version_str: str) -> None:
         """
-        Parse the version string into major, minor and patch.
+        Parse the version string into major, minor, patch, and optional qualifier.
 
         @return: None
         """
         match = re.match(self.__version_regex, version_str)
         if match:
-            self.__major, self.__minor, self.__patch = map(int, match.groups())
+            groups = match.groups()
+            self.__major, self.__minor, self.__patch = map(int, groups[:3])
+            # groups[3] is the optional qualifier group; it's None if not matched
+            self.__qualifier = groups[3]
             self.__valid = True
             logger.info("Version '%s' parsed successfully.", version_str)
         else:
@@ -100,6 +113,79 @@ class Version:
         """
         return self.__valid if self.__valid is not None else False
 
+    def is_valid_qualifier(self) -> tuple[bool, Optional[str]]:
+        """
+        Validate if the qualifier matches allowed patterns.
+
+        @return: A tuple of (is_valid, error_message)
+        """
+        if self.__qualifier is None:
+            return True, None
+
+        # Allowed qualifier patterns
+        qualifier_patterns = {
+            "SNAPSHOT": r"^SNAPSHOT$",
+            "ALPHA": r"^ALPHA$",
+            "BETA": r"^BETA$",
+            "RC": r"^RC([1-9][0-9]?)$",  # RC1 to RC99
+            "RELEASE": r"^RELEASE$",
+            "HF": r"^HF([1-9][0-9]?)$",  # HF1 to HF99
+        }
+
+        # Check each pattern
+        for pattern in qualifier_patterns.values():
+            if re.match(pattern, self.__qualifier):
+                return True, None
+
+        # If no pattern matched, generate a helpful error message
+        error_msg = f"Invalid qualifier '{self.__qualifier}'. "
+        error_msg += "Allowed qualifiers are: SNAPSHOT, ALPHA, BETA, RC1-RC99, RELEASE, HF1-HF99"
+        return False, error_msg
+
+    def get_qualifier_precedence(self) -> tuple[int, int]:  # pylint: disable=too-many-return-statements
+        """
+        Get the precedence value for the qualifier.
+
+        Returns a tuple (category, number) where:
+        - category: the precedence category (0-6)
+        - number: the numeric suffix for RC and HF qualifiers (0 otherwise)
+
+        Precedence order:
+        0: SNAPSHOT (lowest)
+        1: ALPHA
+        2: BETA
+        3: RC1-RC99
+        4: RELEASE
+        5: No qualifier (bare version)
+        6: HF1-HF99 (highest)
+
+        @return: A tuple of (category, number)
+        """
+        if self.__qualifier is None:
+            return (5, 0)  # No qualifier - between RELEASE and HF
+
+        if self.__qualifier == "SNAPSHOT":
+            return (0, 0)
+        if self.__qualifier == "ALPHA":
+            return (1, 0)
+        if self.__qualifier == "BETA":
+            return (2, 0)
+        if self.__qualifier == "RELEASE":
+            return (4, 0)
+
+        # Handle RC with numeric suffix
+        rc_match = re.match(r"^RC(\d+)$", self.__qualifier)
+        if rc_match:
+            return (3, int(rc_match.group(1)))
+
+        # Handle HF with numeric suffix
+        hf_match = re.match(r"^HF(\d+)$", self.__qualifier)
+        if hf_match:
+            return (6, int(hf_match.group(1)))
+
+        # Invalid qualifier - return lowest precedence
+        return (-1, 0)
+
     def __eq__(self, other) -> bool:
         """
         Compare the Version to another Version.
@@ -113,7 +199,12 @@ class Version:
         if not self.is_valid_format() or not other.is_valid_format():
             return False
 
-        return (self.major, self.minor, self.patch) == (other.major, other.minor, other.patch)
+        # Compare numeric components first
+        if (self.major, self.minor, self.patch) != (other.major, other.minor, other.patch):
+            return False
+
+        # If numeric components are equal, compare qualifiers
+        return self.get_qualifier_precedence() == other.get_qualifier_precedence()
 
     def __lt__(self, other) -> Optional[bool]:
         """
@@ -128,7 +219,12 @@ class Version:
         if not self.is_valid_format() or not other.is_valid_format():
             return False
 
-        return (self.major, self.minor, self.patch) < (other.major, other.minor, other.patch)
+        # Compare numeric components first
+        if (self.major, self.minor, self.patch) != (other.major, other.minor, other.patch):
+            return (self.major, self.minor, self.patch) < (other.major, other.minor, other.patch)
+
+        # If numeric components are equal, compare qualifiers
+        return self.get_qualifier_precedence() < other.get_qualifier_precedence()
 
     def __gt__(self, other):
         """
@@ -143,7 +239,12 @@ class Version:
         if not self.is_valid_format() or not other.is_valid_format():
             return False
 
-        return (self.major, self.minor, self.patch) > (other.major, other.minor, other.patch)
+        # Compare numeric components first
+        if (self.major, self.minor, self.patch) != (other.major, other.minor, other.patch):
+            return (self.major, self.minor, self.patch) > (other.major, other.minor, other.patch)
+
+        # If numeric components are equal, compare qualifiers
+        return self.get_qualifier_precedence() > other.get_qualifier_precedence()
 
     def __str__(self) -> str:
         """
@@ -156,4 +257,8 @@ class Version:
         major = self.major if self.major is not None else placeholder
         minor = self.minor if self.minor is not None else placeholder
         patch = self.patch if self.patch is not None else placeholder
-        return f"v{major}.{minor}.{patch}"
+        base = f"v{major}.{minor}.{patch}"
+
+        if self.qualifier is not None:
+            return f"{base}-{self.qualifier}"
+        return base
