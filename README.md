@@ -112,7 +112,7 @@ Numeric versions always take precedence over qualifiers:
 - `v1.0.0` < `v1.0.1` < `v1.1.0` < `v2.0.0`
 
 #### Qualifier Precedence (for the same numeric version)
-For the same numeric version (e.g., `v1.0.0`), qualifiers are ordered as follows:
+For the same numeric version (e.g. `v1.0.0`), qualifiers are ordered as follows:
 
 1. **Pre-release progression:**
    - `v1.0.0-SNAPSHOT` < `v1.0.0-ALPHA` < `v1.0.0-BETA`
