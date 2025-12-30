@@ -57,7 +57,13 @@ class VersionTagCheckAction:
         """
         new_version = Version(self.version_tag_str)
         if not new_version.is_valid_format():
-            set_action_failed('Tag does not match the required format "v[0-9]+.[0-9]+.[0-9]+"')
+            set_action_failed('Tag does not match the required format "v[0-9]+.[0-9]+.[0-9]+([-][A-Z0-9]+)?"')
+
+        # Validate the qualifier if present
+        is_valid_qualifier, qualifier_error = new_version.is_valid_qualifier()
+        if not is_valid_qualifier:
+            error_msg = qualifier_error if qualifier_error else "Invalid qualifier"
+            set_action_failed(error_msg)
 
         repository: GitHubRepository = GitHubRepository(self.owner, self.repo, self.github_token)
         existing_versions: list[Version] = repository.get_all_tags()
