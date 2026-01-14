@@ -1,7 +1,10 @@
 """Integration-style tests that run the action via main.py for local execution.
 
-These tests run the full wiring (logging setup + VersionTagCheckAction) but mock
-GitHubRepository to avoid real network calls.
+These tests execute the action entrypoint (main.py) in a subprocess to cover the
+real wiring (logging setup + VersionTagCheckAction).
+
+To avoid real network calls, GitHubRepository is patched in the child process
+via a temporary ``sitecustomize.py`` module.
 """
 
 import os
@@ -23,7 +26,8 @@ def test_local_run_successful_new_version(tmp_path):
     v0.1.0.
     """
 
-    # Ensure we import the project from the repo root when running via subprocess
+    # Run the subprocess with a PYTHONPATH that includes the repo root so that
+    # imports like `version_tag_check.*` resolve.
     env = os.environ.copy()
     env["PYTHONPATH"] = f"{PROJECT_ROOT}{os.pathsep}{env.get('PYTHONPATH', '')}"
 
@@ -47,6 +51,10 @@ def test_local_run_successful_new_version(tmp_path):
         encoding="utf-8",
     )
 
+    # Prepend the temp directory so the child interpreter auto-imports our
+    # `sitecustomize.py` module (Python imports `sitecustomize` at startup if it
+    # can be found on sys.path). This ensures the GitHubRepository patch is
+    # applied before main.py executes.
     env["PYTHONPATH"] = f"{tmp_path}{os.pathsep}{env['PYTHONPATH']}"
 
     result = subprocess.run(
@@ -84,6 +92,7 @@ def test_local_run_fails_on_existing_tag(tmp_path):
         encoding="utf-8",
     )
 
+    # See the comment in the test above for why we prepend tmp_path.
     env["PYTHONPATH"] = f"{tmp_path}{os.pathsep}{env['PYTHONPATH']}"
 
     result = subprocess.run(
