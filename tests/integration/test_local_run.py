@@ -15,24 +15,8 @@ import pytest
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
-class DummyGitHubRepository:
-    """Simple stand-in for GitHubRepository used in integration tests."""
-
-    def __init__(self, owner: str, repo: str, token: str) -> None:  # noqa: ARG002
-        self.owner = owner
-        self.repo = repo
-        self.token = token
-
-    def get_all_tags(self):
-        """Return a deterministic list of tags for integration tests."""
-
-        from version_tag_check.version import Version
-
-        return [Version("v0.0.1"), Version("v0.0.2"), Version("v0.1.0")]  # type: ignore[list-item]
-
-
 @pytest.mark.integration
-def test_local_run_successful_new_version(monkeypatch, tmp_path):
+def test_local_run_successful_new_version(tmp_path):
     """Run main.py as a subprocess and expect success for a valid new version.
 
     Scenario: New tag v0.1.1 is a valid patch increment on top of existing
@@ -58,7 +42,7 @@ def test_local_run_successful_new_version(monkeypatch, tmp_path):
     sitecustomize_path = tmp_path / "sitecustomize.py"
     sitecustomize_path.write_text(
         "from version_tag_check import github_repository as ghr\n"
-        "from tests.integration.test_local_run import DummyGitHubRepository\n"
+        "from tests.integration.dummy_github_repository import DummyGitHubRepository\n"
         "ghr.GitHubRepository = DummyGitHubRepository\n",
         encoding="utf-8",
     )
@@ -77,7 +61,7 @@ def test_local_run_successful_new_version(monkeypatch, tmp_path):
 
 
 @pytest.mark.integration
-def test_local_run_fails_on_existing_tag(monkeypatch, tmp_path):
+def test_local_run_fails_on_existing_tag(tmp_path):
     """Run main.py as a subprocess and expect failure when tag already exists.
 
     Scenario: New tag v0.1.0 already exists in the list returned by
@@ -89,13 +73,13 @@ def test_local_run_fails_on_existing_tag(monkeypatch, tmp_path):
 
     env["INPUT_GITHUB_TOKEN"] = "fake-token"
     env["INPUT_GITHUB_REPOSITORY"] = "owner/repo"
-    env["INPUT_VERSION_TAG"] = "v0.1.0"  # already present in DummyGitGitHubRepository
+    env["INPUT_VERSION_TAG"] = "v0.1.0"  # already present in DummyGitHubRepository
     env["INPUT_SHOULD_EXIST"] = "false"
 
     sitecustomize_path = tmp_path / "sitecustomize.py"
     sitecustomize_path.write_text(
         "from version_tag_check import github_repository as ghr\n"
-        "from tests.integration.test_local_run import DummyGitHubRepository\n"
+        "from tests.integration.dummy_github_repository import DummyGitHubRepository\n"
         "ghr.GitHubRepository = DummyGitHubRepository\n",
         encoding="utf-8",
     )
