@@ -90,18 +90,45 @@ See the default action step definition:
 > To troubleshoot a failing run, re-run the GitHub Actions workflow with "debug logging" enabled or run it locally using the script described in [Developer Guide](DEVELOPER.md).
 
 ### Supported Version Tags Formats
-- `v1.0.0`
 
-### Support Version Weight Comparison
+#### Standard Versions
+- `v1.0.0` - Standard semantic version
+
+#### Pre-release Qualifiers
+- `v1.0.0-SNAPSHOT` - Snapshot pre-release
+- `v1.0.0-ALPHA` - Alpha pre-release
+- `v1.0.0-BETA` - Beta pre-release
+- `v1.0.0-RC1` to `v1.0.0-RC99` - Release candidates (e.g., RC1, RC2, ..., RC99)
+- `v1.0.0-RELEASE` - Release qualifier
+
+#### Hotfix Qualifiers
+- `v1.0.0-HF1` to `v1.0.0-HF99` - Hotfixes (e.g., HF1, HF2, ..., HF99)
+
+### Version Weight Comparison
+
+#### Numeric Precedence
+Numeric versions always take precedence over qualifiers:
+- `v2.0.0-SNAPSHOT` > `v1.9.9-RELEASE`
 - `v1.0.0` < `v1.0.1` < `v1.1.0` < `v2.0.0`
 
-### Planned Support of Version Tags Formats With Qualifiers
-- `v1.0.0-SNAPSHOT`, `v1.0.0-RC[0..9]`, `v1.0.0-RELEASE`, `v1.0.0-HF[0..9]`
-- `v1.0.0-ALPHA`, `v1.0.0-BETA`
+#### Qualifier Precedence (for the same numeric version)
+For the same numeric version (e.g. `v1.0.0`), qualifiers are ordered as follows:
 
-### Planned Support of Version Weight Comparison With Qualifiers
-- `v1.0.0-SNAPSHOT` < `v1.0.0-RC1` < `v1.0.0-RC2` < `v1.0.0-RELEASE` < `v1.0.0-HF1` < `v1.0.0-HF2`
-- `v1.0.0-ALPHA` < `v1.0.0-BETA`
+1. **Pre-release progression:**
+   - `v1.0.0-SNAPSHOT` < `v1.0.0-ALPHA` < `v1.0.0-BETA`
+   - `v1.0.0-BETA` < `v1.0.0-RC1` < `v1.0.0-RC2` < ... < `v1.0.0-RC99`
+   - `v1.0.0-RC99` < `v1.0.0-RELEASE` < `v1.0.0`
+
+2. **Hotfix progression:**
+   - `v1.0.0` < `v1.0.0-HF1` < `v1.0.0-HF2` < ... < `v1.0.0-HF99`
+
+**Example progression:**
+```
+v1.0.0-SNAPSHOT → v1.0.0-ALPHA → v1.0.0-BETA → v1.0.0-RC1 → v1.0.0-RC2 → 
+v1.0.0-RELEASE → v1.0.0 → v1.0.0-HF1 → v1.0.0-HF2
+```
+
+For more details, see the [Version qualifier validation specification](docs/qualifier-spec.md).
 
 ## Developer Guide
 
