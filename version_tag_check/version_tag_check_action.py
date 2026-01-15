@@ -27,6 +27,10 @@ from version_tag_check.version_validator import NewVersionValidator
 
 logger = logging.getLogger(__name__)
 
+# Error messages
+ERROR_TAG_ALREADY_EXISTS = "The tag already exists in the repository."
+ERROR_TAG_DOES_NOT_EXIST = "The tag does not exist in the repository."
+
 
 # pylint: disable=too-few-public-methods
 class VersionTagCheckAction:
@@ -72,11 +76,11 @@ class VersionTagCheckAction:
         if new_version in existing_versions:
             # it exists, check if not expected
             if not self.should_exist:
-                set_action_failed("The tag already exists in the repository.")
+                set_action_failed(ERROR_TAG_ALREADY_EXISTS)
         else:
             # it does not exist, check if expected
             if self.should_exist:
-                set_action_failed("The tag does not exist in the repository.")
+                set_action_failed(ERROR_TAG_DOES_NOT_EXIST)
 
         # if expected to exist, exit here, no more checks expected to be done
         if self.should_exist:

@@ -7,29 +7,28 @@ To avoid real network calls, GitHubRepository is patched in the child process
 via a temporary ``sitecustomize.py`` module.
 """
 
-import os
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
+from version_tag_check.version_tag_check_action import ERROR_TAG_ALREADY_EXISTS
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 @pytest.mark.integration
-def test_local_run_successful_new_version(tmp_path):
+def test_local_run_successful_new_version(subprocess_env_with_mocked_github):
     """Run main.py as a subprocess and expect success for a valid new version.
 
     Scenario: New tag v0.1.1 is a valid patch increment on top of existing
     v0.1.0.
     """
 
-    # Run the subprocess with a PYTHONPATH that includes the repo root so that
-    # imports like `version_tag_check.*` resolve.
-    env = os.environ.copy()
-    env["PYTHONPATH"] = f"{PROJECT_ROOT}{os.pathsep}{env.get('PYTHONPATH', '')}"
+    # Use the fixture to get the environment with mocked GitHubRepository
+    env = subprocess_env_with_mocked_github
 
     # Provide action inputs via the same environment variables used in the action.yml
     env["INPUT_GITHUB_TOKEN"] = "fake-token"
@@ -39,23 +38,6 @@ def test_local_run_successful_new_version(tmp_path):
 
     # Enable debug logging so we can see integration-level logs if needed
     env["RUNNER_DEBUG"] = "1"
-
-    # Monkeypatch GitHubRepository in the child process via sitecustomize.
-    # We create a small sitecustomize module on the fly that patches the class
-    # before main.py runs.
-    sitecustomize_path = tmp_path / "sitecustomize.py"
-    sitecustomize_path.write_text(
-        "from version_tag_check import github_repository as ghr\n"
-        "from tests.integration.dummy_github_repository import DummyGitHubRepository\n"
-        "ghr.GitHubRepository = DummyGitHubRepository\n",
-        encoding="utf-8",
-    )
-
-    # Prepend the temp directory so the child interpreter auto-imports our
-    # `sitecustomize.py` module (Python imports `sitecustomize` at startup if it
-    # can be found on sys.path). This ensures the GitHubRepository patch is
-    # applied before main.py executes.
-    env["PYTHONPATH"] = f"{tmp_path}{os.pathsep}{env['PYTHONPATH']}"
 
     result = subprocess.run(
         [sys.executable, str(PROJECT_ROOT / "main.py")],
@@ -69,31 +51,19 @@ def test_local_run_successful_new_version(tmp_path):
 
 
 @pytest.mark.integration
-def test_local_run_fails_on_existing_tag(tmp_path):
+def test_local_run_fails_on_existing_tag(subprocess_env_with_mocked_github):
     """Run main.py as a subprocess and expect failure when tag already exists.
 
     Scenario: New tag v0.1.0 already exists in the list returned by
     DummyGitHubRepository, so the action should fail.
     """
 
-    env = os.environ.copy()
-    env["PYTHONPATH"] = f"{PROJECT_ROOT}{os.pathsep}{env.get('PYTHONPATH', '')}"
+    env = subprocess_env_with_mocked_github
 
     env["INPUT_GITHUB_TOKEN"] = "fake-token"
     env["INPUT_GITHUB_REPOSITORY"] = "owner/repo"
     env["INPUT_VERSION_TAG"] = "v0.1.0"  # already present in DummyGitHubRepository
     env["INPUT_SHOULD_EXIST"] = "false"
-
-    sitecustomize_path = tmp_path / "sitecustomize.py"
-    sitecustomize_path.write_text(
-        "from version_tag_check import github_repository as ghr\n"
-        "from tests.integration.dummy_github_repository import DummyGitHubRepository\n"
-        "ghr.GitHubRepository = DummyGitHubRepository\n",
-        encoding="utf-8",
-    )
-
-    # See the comment in the test above for why we prepend tmp_path.
-    env["PYTHONPATH"] = f"{tmp_path}{os.pathsep}{env['PYTHONPATH']}"
 
     result = subprocess.run(
         [sys.executable, str(PROJECT_ROOT / "main.py")],
@@ -104,4 +74,4 @@ def test_local_run_fails_on_existing_tag(tmp_path):
     )
 
     assert result.returncode != 0
-    assert "The tag already exists in the repository" in (result.stdout + result.stderr)
+    assert ERROR_TAG_ALREADY_EXISTS in (result.stdout + result.stderr)
