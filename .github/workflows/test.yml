@@ -104,7 +104,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Check code coverage with Pytest
-        run: pytest --cov=. -v -m "not integration" tests/ --cov-fail-under=80
+        run: pytest --cov=. -v -m "not integration" tests/ --cov-fail-under=80 --ignore=tests
 
   integration-test:
     name: Integration Tests

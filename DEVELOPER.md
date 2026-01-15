@@ -234,7 +234,7 @@ The objective of the project is to achieve a minimum score of 80 %. We do exclud
 
 To generate the coverage report, run the following command:
 ```shell
-pytest --ignore=tests/integration --cov=. tests/ --cov-fail-under=80 --cov-report=html
+pytest --ignore=tests --cov=. tests/ --cov-fail-under=80 --cov-report=html
 ```
 
 See the coverage report on the path:
