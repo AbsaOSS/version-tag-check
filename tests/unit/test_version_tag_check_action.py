@@ -19,7 +19,7 @@ import logging
 import os
 import pytest
 
-from version_tag_check.utils.contansts import ERROR_TAG_ALREADY_EXISTS, ERROR_TAG_DOES_NOT_EXIST
+from version_tag_check.utils.constants import ERROR_TAG_ALREADY_EXISTS, ERROR_TAG_DOES_NOT_EXIST
 from version_tag_check.version import Version
 from version_tag_check.version_tag_check_action import VersionTagCheckAction
 

@@ -14,7 +14,10 @@
 # limitations under the License.
 #
 
-"""Constant error messages used across the action."""
+"""
+This module contains the constants used in the version tag check action.
+"""
+
 
 # Error messages
 ERROR_TAG_ALREADY_EXISTS = "The tag already exists in the repository."
