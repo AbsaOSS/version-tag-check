@@ -21,6 +21,7 @@ import logging
 import sys
 
 from version_tag_check.github_repository import GitHubRepository
+from version_tag_check.utils.constants import ERROR_TAG_ALREADY_EXISTS, ERROR_TAG_DOES_NOT_EXIST
 from version_tag_check.utils.gh_action import get_action_input, set_action_failed
 from version_tag_check.version import Version
 from version_tag_check.version_validator import NewVersionValidator
@@ -72,11 +73,11 @@ class VersionTagCheckAction:
         if new_version in existing_versions:
             # it exists, check if not expected
             if not self.should_exist:
-                set_action_failed("The tag already exists in the repository.")
+                set_action_failed(ERROR_TAG_ALREADY_EXISTS)
         else:
             # it does not exist, check if expected
             if self.should_exist:
-                set_action_failed("The tag does not exist in the repository.")
+                set_action_failed(ERROR_TAG_DOES_NOT_EXIST)
 
         # if expected to exist, exit here, no more checks expected to be done
         if self.should_exist:

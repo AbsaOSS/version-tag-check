@@ -9,3 +9,23 @@ omit = ["tests/*", "main.py", "version_tag_check/github_repository.py"]
 [tool.mypy]
 check_untyped_defs = true
 exclude = "tests"
+
+[tool.pytest.ini_options]
+markers = [
+	"integration: integration-style tests that run main.py as a subprocess",
+]
+
+testpaths = [
+	"tests",
+]
+
+norecursedirs = [
+	".git",
+	".mypy_cache",
+	".pytest_cache",
+	".venv",
+	"__pycache__",
+	"build",
+	"dist",
+	"htmlcov",
+]

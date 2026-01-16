@@ -6,6 +6,7 @@
 - [Run Black Tool Locally](#run-black-tool-locally)
 - [Run mypy Tool Locally](#run-mypy-tool-locally)
 - [Run Unit Tests with Pytest](#run-unit-tests-with-pytest)
+- [Run Integration Tests with Pytest](#run-integration-tests-with-pytest)
 - [Code Coverage with pytest-cov](#code-coverage-with-pytest-cov)
 - [Releasing](#releasing)
 - [Development Flow with GitHub Copilot](#development-flow-with-github-copilot)
@@ -189,15 +190,41 @@ Success: no issues found in 1 source file
 
 ---
 
-
 ## Run Unit Tests with Pytest
 
-Unit tests are written using the Pytest framework. To run all the tests, use the following command:
+Unit tests are written using the Pytest framework and are located under `tests/unit/`.
+
+To run only unit tests (excluding integration tests), use the following command:
 ```shell
-pytest tests/
+pytest -v tests/unit/
 ```
 
 You can modify the directory to control the level of detail or granularity as per your needs.
+
+---
+
+## Run Integration Tests with Pytest
+
+Integration tests are located under `tests/integration/` and are marked with `@pytest.mark.integration`.
+
+These tests run the action entrypoint (`main.py`) in a subprocess and patch `GitHubRepository` in the child process to avoid real network calls.
+Inputs are provided via the same environment variables used by the action (`INPUT_GITHUB_TOKEN`, `INPUT_GITHUB_REPOSITORY`, `INPUT_VERSION_TAG`, `INPUT_SHOULD_EXIST`).
+
+Prerequisites:
+
+- Perform the [setup of python venv](#set-up-python-environment).
+
+Run only integration tests:
+
+```shell
+pytest -v -m integration tests/integration/
+```
+
+Run everything except integration tests:
+
+```shell
+pytest -v -m "not integration" tests/
+```
 
 ---
 ## Code Coverage with pytest-cov
@@ -207,7 +234,7 @@ The objective of the project is to achieve a minimum score of 80 %. We do exclud
 
 To generate the coverage report, run the following command:
 ```shell
-pytest --ignore=tests/integration --cov=. tests/ --cov-fail-under=80 --cov-report=html
+pytest --ignore=tests --cov=. tests/ --cov-fail-under=80 --cov-report=html
 ```
 
 See the coverage report on the path:

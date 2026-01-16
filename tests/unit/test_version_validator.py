@@ -42,6 +42,7 @@ test_cases = [
     (["v1.1.1"], "v1.1.3", False),  # Skipping patch version
 ]
 
+
 @pytest.mark.parametrize("existing_versions_str, new_version_str, expected", test_cases)
 def test_is_valid_increment(existing_versions_str, new_version_str, expected):
     existing_versions = [Version(v_str) for v_str in existing_versions_str]

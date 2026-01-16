@@ -14,17 +14,11 @@
 # limitations under the License.
 #
 
-import pytest
+"""
+This module contains the constants used in the version tag check action.
+"""
 
-@pytest.fixture
-def mock_logging_setup(mocker):
-    """Fixture to mock the basic logging setup using pytest-mock."""
-    mock_log_config = mocker.patch("logging.basicConfig")
-    yield mock_log_config
 
-@pytest.fixture()
-def mock_exit(code) -> list:
-    """Fixture to mock the sys.exit function using pytest-mock."""
-    exit_calls = []
-    exit_calls.append(code)
-    return exit_calls
+# Error messages
+ERROR_TAG_ALREADY_EXISTS = "The tag already exists in the repository."
+ERROR_TAG_DOES_NOT_EXIST = "The tag does not exist in the repository."
