@@ -15,7 +15,7 @@
 #
 
 name: 'Version Tag Check'
-description: 'A GH action for validating version tag sequences and ensuring compliance with versioning standards in repositories. Supports semantic versioning with optional qualifiers (SNAPSHOT, ALPHA, BETA, RC1-RC99, RELEASE, HF1-HF99).'
+description: 'Validate semantic version tags (v1.2.3) with qualifiers (SNAPSHOT, ALPHA, BETA, RC, HF, RELEASE).'
 inputs:
   github-repository:
     description: 'The GitHub repository to check for the latest version tag. Example: "owner/repo".'
