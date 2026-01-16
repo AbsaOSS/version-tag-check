@@ -21,6 +21,10 @@ on:
       - '**'
     types: [ opened, synchronize, reopened ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   static-code-analysis:
     runs-on: ubuntu-latest
@@ -34,7 +38,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
         with:
-          python-version: '3.11'
+          python-version: '3.13'
           cache: 'pip'
 
       - name: Install dependencies
@@ -44,7 +48,7 @@ jobs:
       - name: Analyze code with Pylint
         id: analyze-code
         run: |
-          pylint_score=$(pylint --ignore=tests $(git ls-files '*.py')| grep 'rated at' | awk '{print $7}' | cut -d'/' -f1)
+          pylint_score=$(pylint $(git ls-files '*.py')| grep 'rated at' | awk '{print $7}' | cut -d'/' -f1)
           echo "PYLINT_SCORE=$pylint_score" >> $GITHUB_ENV
 
       - name: Check Pylint score
@@ -68,7 +72,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
         with:
-          python-version: '3.11'
+          python-version: '3.13'
           cache: 'pip'
 
       - name: Install dependencies
@@ -96,7 +100,7 @@ jobs:
 
       - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
         with:
-          python-version: '3.11'
+          python-version: '3.13'
           cache: 'pip'
 
       - name: Install Python dependencies
@@ -104,7 +108,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Check code coverage with Pytest
-        run: pytest --cov=. -v -m "not integration" tests/ --cov-fail-under=80 --ignore=tests
+        run: pytest --cov=. -v -m "not integration" tests/ --cov-fail-under=80
 
   integration-test:
     name: Integration Tests
@@ -122,7 +126,7 @@ jobs:
 
       - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
         with:
-          python-version: '3.11'
+          python-version: '3.13'
           cache: 'pip'
 
       - name: Install Python dependencies
@@ -144,7 +148,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
         with:
-          python-version: '3.11'
+          python-version: '3.13'
           cache: 'pip'
 
       - name: Install dependencies

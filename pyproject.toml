@@ -14,3 +14,18 @@ exclude = "tests"
 markers = [
 	"integration: integration-style tests that run main.py as a subprocess",
 ]
+
+testpaths = [
+	"tests",
+]
+
+norecursedirs = [
+	".git",
+	".mypy_cache",
+	".pytest_cache",
+	".venv",
+	"__pycache__",
+	"build",
+	"dist",
+	"htmlcov",
+]
