@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+"""Constant error messages used across the action."""
+
 # Error messages
 ERROR_TAG_ALREADY_EXISTS = "The tag already exists in the repository."
 ERROR_TAG_DOES_NOT_EXIST = "The tag does not exist in the repository."
