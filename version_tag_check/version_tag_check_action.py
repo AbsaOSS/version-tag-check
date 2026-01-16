@@ -21,7 +21,7 @@ import logging
 import sys
 
 from version_tag_check.github_repository import GitHubRepository
-from version_tag_check.utils.contanst import ERROR_TAG_ALREADY_EXISTS, ERROR_TAG_DOES_NOT_EXIST
+from version_tag_check.utils.contansts import ERROR_TAG_ALREADY_EXISTS, ERROR_TAG_DOES_NOT_EXIST
 from version_tag_check.utils.gh_action import get_action_input, set_action_failed
 from version_tag_check.version import Version
 from version_tag_check.version_validator import NewVersionValidator

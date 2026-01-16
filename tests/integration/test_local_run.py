@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from version_tag_check.utils.contanst import ERROR_TAG_ALREADY_EXISTS
+from version_tag_check.utils.contansts import ERROR_TAG_ALREADY_EXISTS
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
