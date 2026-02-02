@@ -17,6 +17,7 @@
 """
 This module contains the VersionTagCheckAction class which is the main entry point for the GitHub Action.
 """
+
 import logging
 import sys
 

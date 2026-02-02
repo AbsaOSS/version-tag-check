@@ -23,7 +23,6 @@ import logging
 from version_tag_check.utils.logging_config import setup_logging
 from version_tag_check.version_tag_check_action import VersionTagCheckAction
 
-
 if __name__ == "__main__":
     setup_logging()
     logger = logging.getLogger(__name__)

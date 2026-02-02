@@ -17,6 +17,7 @@
 """
 This module provides utilities for GitHub Actions.
 """
+
 import logging
 import os
 import sys
