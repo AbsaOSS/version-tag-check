@@ -17,6 +17,7 @@
 """
 This module contains the main script for the Version Tag Check GH Action.
 """
+
 import logging
 from typing import Optional
 
