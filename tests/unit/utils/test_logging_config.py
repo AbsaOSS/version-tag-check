@@ -15,7 +15,6 @@
 #
 
 import logging
-import os
 import sys
 
 from logging import StreamHandler
@@ -58,8 +57,10 @@ def test_setup_logging_default_logging_level(mock_logging_setup: MockType, caplo
     validate_logging_config(mock_logging_setup, caplog, logging.INFO, "Logging configuration set up.")
 
 
-def test_setup_logging_debug_mode_enabled_by_ci(mock_logging_setup: MockType, caplog: pytest.LogCaptureFixture) -> None:
-    os.environ["RUNNER_DEBUG"] = "1"
+def test_setup_logging_debug_mode_enabled_by_ci(
+    monkeypatch: pytest.MonkeyPatch, mock_logging_setup: MockType, caplog: pytest.LogCaptureFixture
+) -> None:
+    monkeypatch.setenv("RUNNER_DEBUG", "1")
 
     with caplog.at_level(logging.DEBUG):
         setup_logging()

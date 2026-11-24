@@ -16,7 +16,6 @@
 
 
 import logging
-import os
 from typing import NoReturn
 
 import pytest
@@ -25,6 +24,13 @@ from pytest_mock import MockerFixture
 from version_tag_check.utils.constants import ERROR_TAG_ALREADY_EXISTS, ERROR_TAG_DOES_NOT_EXIST, ERROR_TAG_INVALID_FORMAT
 from version_tag_check.version import Version
 from version_tag_check.version_tag_check_action import VersionTagCheckAction
+
+
+def _set_inputs(monkeypatch: pytest.MonkeyPatch, version_tag: str, should_exist: str) -> None:
+    monkeypatch.setenv("INPUT_GITHUB_TOKEN", "fake_token")
+    monkeypatch.setenv("INPUT_VERSION_TAG", version_tag)
+    monkeypatch.setenv("INPUT_GITHUB_REPOSITORY", "owner/repo")
+    monkeypatch.setenv("INPUT_SHOULD_EXIST", should_exist)
 
 
 # input validation
@@ -44,9 +50,9 @@ def test_validate_inputs_missing_variables(
         "INPUT_VERSION_TAG": "v1.0.0",
     }
     env_vars.pop(missing_var)  # Remove the variable to test
-    if missing_var in os.environ.keys():
-        os.environ.pop(missing_var)
-    os.environ.update(env_vars)
+    monkeypatch.delenv(missing_var, raising=False)
+    for name, value in env_vars.items():
+        monkeypatch.setenv(name, value)
 
     # Mock sys.exit to raise SystemExit exception
     with pytest.raises(SystemExit) as e:
@@ -79,16 +85,13 @@ def test_validate_inputs_missing_variables(
     ],
 )
 def test_run_successful_should_not_exist(
-    mocker: MockerFixture, version_tag: str, should_exist: str, existing_tags: list[Version]
+    monkeypatch: pytest.MonkeyPatch,
+    mocker: MockerFixture,
+    version_tag: str,
+    should_exist: str,
+    existing_tags: list[Version],
 ) -> None:
-    # Set environment variables
-    env_vars = {
-        "INPUT_GITHUB_TOKEN": "fake_token",
-        "INPUT_VERSION_TAG": version_tag,
-        "INPUT_GITHUB_REPOSITORY": "owner/repo",
-        "INPUT_SHOULD_EXIST": should_exist,
-    }
-    os.environ.update(env_vars)
+    _set_inputs(monkeypatch, version_tag, should_exist)
 
     # Mock sys.exit to prevent the test from exiting
     mock_exit = mocker.patch("sys.exit")
@@ -112,16 +115,13 @@ def test_run_successful_should_not_exist(
     ],
 )
 def test_run_successful_should_exist(
-    mocker: MockerFixture, version_tag: str, should_exist: str, existing_tags: list[Version]
+    monkeypatch: pytest.MonkeyPatch,
+    mocker: MockerFixture,
+    version_tag: str,
+    should_exist: str,
+    existing_tags: list[Version],
 ) -> None:
-    # Set environment variables
-    env_vars = {
-        "INPUT_GITHUB_TOKEN": "fake_token",
-        "INPUT_VERSION_TAG": version_tag,
-        "INPUT_GITHUB_REPOSITORY": "owner/repo",
-        "INPUT_SHOULD_EXIST": should_exist,
-    }
-    os.environ.update(env_vars)
+    _set_inputs(monkeypatch, version_tag, should_exist)
 
     # Mock the GitHubRepository class
     mock_repository_class = mocker.patch("version_tag_check.version_tag_check_action.GitHubRepository")
@@ -150,6 +150,7 @@ def test_run_successful_should_exist(
     ],
 )
 def test_run_unsuccessful(
+    monkeypatch: pytest.MonkeyPatch,
     mocker: MockerFixture,
     caplog: pytest.LogCaptureFixture,
     version_tag: str,
@@ -160,14 +161,7 @@ def test_run_unsuccessful(
     expected_exit_code: int,
     error_message: str,
 ) -> None:
-    # Set environment variables
-    env_vars = {
-        "INPUT_GITHUB_TOKEN": "fake_token",
-        "INPUT_VERSION_TAG": version_tag,
-        "INPUT_GITHUB_REPOSITORY": "owner/repo",
-        "INPUT_SHOULD_EXIST": should_exist,
-    }
-    os.environ.update(env_vars)
+    _set_inputs(monkeypatch, version_tag, should_exist)
 
     # Mock sys.exit to raise a SystemExit for assertion
     def mock_exit(code: int) -> NoReturn:
@@ -210,17 +204,14 @@ def test_run_unsuccessful(
     ],
 )
 def test_run_successful_with_qualifiers(
-    mocker: MockerFixture, version_tag: str, should_exist: str, existing_tags: list[Version]
+    monkeypatch: pytest.MonkeyPatch,
+    mocker: MockerFixture,
+    version_tag: str,
+    should_exist: str,
+    existing_tags: list[Version],
 ) -> None:
     """Test that the action handles version tags with valid qualifiers"""
-    # Set environment variables
-    env_vars = {
-        "INPUT_GITHUB_TOKEN": "fake_token",
-        "INPUT_VERSION_TAG": version_tag,
-        "INPUT_GITHUB_REPOSITORY": "owner/repo",
-        "INPUT_SHOULD_EXIST": should_exist,
-    }
-    os.environ.update(env_vars)
+    _set_inputs(monkeypatch, version_tag, should_exist)
 
     # Mock sys.exit to prevent the test from exiting
     mock_exit = mocker.patch("sys.exit")
@@ -257,17 +248,14 @@ def test_run_successful_with_qualifiers(
     ],
 )
 def test_run_invalid_qualifier(
-    mocker: MockerFixture, caplog: pytest.LogCaptureFixture, version_tag: str, expected_error: str
+    monkeypatch: pytest.MonkeyPatch,
+    mocker: MockerFixture,
+    caplog: pytest.LogCaptureFixture,
+    version_tag: str,
+    expected_error: str,
 ) -> None:
     """Test that the action rejects version tags with invalid qualifiers"""
-    # Set environment variables
-    env_vars = {
-        "INPUT_GITHUB_TOKEN": "fake_token",
-        "INPUT_VERSION_TAG": version_tag,
-        "INPUT_GITHUB_REPOSITORY": "owner/repo",
-        "INPUT_SHOULD_EXIST": "false",
-    }
-    os.environ.update(env_vars)
+    _set_inputs(monkeypatch, version_tag, "false")
 
     # Mock sys.exit to raise a SystemExit for assertion
     def mock_exit(code: int) -> NoReturn:
@@ -295,15 +283,6 @@ def test_run_invalid_qualifier(
 
 # Tests for the PEP 440 release candidate "vX.Y.ZrcN"
 
-def _set_inputs(version_tag: str, should_exist: str) -> None:
-    os.environ.update({
-        "INPUT_GITHUB_TOKEN": "fake_token",
-        "INPUT_VERSION_TAG": version_tag,
-        "INPUT_GITHUB_REPOSITORY": "owner/repo",
-        "INPUT_SHOULD_EXIST": should_exist,
-    })
-
-
 def _mock_tags(mocker: MockerFixture, existing_tags: list[Version]) -> None:
     mock_repository_class = mocker.patch("version_tag_check.version_tag_check_action.GitHubRepository")
     mock_repository_class.return_value.get_all_tags.return_value = existing_tags
@@ -329,9 +308,13 @@ def _raise_on_exit(mocker: MockerFixture) -> None:
     ],
 )
 def test_run_successful_with_pep440_rc(
-    mocker: MockerFixture, version_tag: str, should_exist: str, existing_tags: list[Version]
+    monkeypatch: pytest.MonkeyPatch,
+    mocker: MockerFixture,
+    version_tag: str,
+    should_exist: str,
+    existing_tags: list[Version],
 ) -> None:
-    _set_inputs(version_tag, should_exist)
+    _set_inputs(monkeypatch, version_tag, should_exist)
     _raise_on_exit(mocker)
     _mock_tags(mocker, existing_tags)
 
@@ -355,6 +338,7 @@ def test_run_successful_with_pep440_rc(
     ],
 )
 def test_run_unsuccessful_with_pep440_rc(
+    monkeypatch: pytest.MonkeyPatch,
     mocker: MockerFixture,
     caplog: pytest.LogCaptureFixture,
     version_tag: str,
@@ -362,7 +346,7 @@ def test_run_unsuccessful_with_pep440_rc(
     existing_tags: list[Version],
     error_message: str,
 ) -> None:
-    _set_inputs(version_tag, should_exist)
+    _set_inputs(monkeypatch, version_tag, should_exist)
     _raise_on_exit(mocker)
     _mock_tags(mocker, existing_tags)
 
@@ -384,9 +368,14 @@ def test_run_unsuccessful_with_pep440_rc(
     ],
 )
 def test_run_logs_other_spelling_of_found_tag(
-    mocker: MockerFixture, caplog: pytest.LogCaptureFixture, version_tag: str, should_exist: str, existing_tag: str
+    monkeypatch: pytest.MonkeyPatch,
+    mocker: MockerFixture,
+    caplog: pytest.LogCaptureFixture,
+    version_tag: str,
+    should_exist: str,
+    existing_tag: str,
 ) -> None:
-    _set_inputs(version_tag, should_exist)
+    _set_inputs(monkeypatch, version_tag, should_exist)
     _raise_on_exit(mocker)
     _mock_tags(mocker, [Version(existing_tag)])
 
@@ -398,8 +387,10 @@ def test_run_logs_other_spelling_of_found_tag(
     assert f"Tag {version_tag} exists in the repository as {existing_tag}." in caplog.text
 
 
-def test_run_does_not_log_same_spelling_of_found_tag(mocker: MockerFixture, caplog: pytest.LogCaptureFixture) -> None:
-    _set_inputs("v0.9.0rc1", "true")
+def test_run_does_not_log_same_spelling_of_found_tag(
+    monkeypatch: pytest.MonkeyPatch, mocker: MockerFixture, caplog: pytest.LogCaptureFixture
+) -> None:
+    _set_inputs(monkeypatch, "v0.9.0rc1", "true")
     _raise_on_exit(mocker)
     _mock_tags(mocker, [Version("v0.9.0rc1")])
 
@@ -419,9 +410,9 @@ def test_run_does_not_log_same_spelling_of_found_tag(mocker: MockerFixture, capl
     ],
 )
 def test_run_does_not_log_other_spelling_when_exact_tag_exists(
-    mocker: MockerFixture, caplog: pytest.LogCaptureFixture, existing_tags: list[str]
+    monkeypatch: pytest.MonkeyPatch, mocker: MockerFixture, caplog: pytest.LogCaptureFixture, existing_tags: list[str]
 ) -> None:
-    _set_inputs("v0.9.0rc1", "true")
+    _set_inputs(monkeypatch, "v0.9.0rc1", "true")
     _raise_on_exit(mocker)
     _mock_tags(mocker, [Version(tag) for tag in existing_tags])
 
