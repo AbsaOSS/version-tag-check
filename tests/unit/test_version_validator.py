@@ -44,7 +44,7 @@ test_cases = [
 
 
 @pytest.mark.parametrize("existing_versions_str, new_version_str, expected", test_cases)
-def test_is_valid_increment(existing_versions_str, new_version_str, expected):
+def test_is_valid_increment(existing_versions_str: list[str], new_version_str: str, expected: bool) -> None:
     existing_versions = [Version(v_str) for v_str in existing_versions_str]
     new_version = Version(new_version_str)
     validator = NewVersionValidator(new_version, existing_versions)
@@ -110,7 +110,9 @@ qualifier_test_cases = [
 ]
 
 @pytest.mark.parametrize("existing_versions_str, new_version_str, expected", qualifier_test_cases)
-def test_is_valid_increment_with_qualifiers(existing_versions_str, new_version_str, expected):
+def test_is_valid_increment_with_qualifiers(
+    existing_versions_str: list[str], new_version_str: str, expected: bool
+) -> None:
     existing_versions = [Version(v_str) for v_str in existing_versions_str]
     new_version = Version(new_version_str)
     validator = NewVersionValidator(new_version, existing_versions)
@@ -154,7 +156,9 @@ pep440_rc_test_cases = [
 
 
 @pytest.mark.parametrize("existing_versions_str, new_version_str, expected", pep440_rc_test_cases)
-def test_is_valid_increment_with_pep440_rc(existing_versions_str, new_version_str, expected):
+def test_is_valid_increment_with_pep440_rc(
+    existing_versions_str: list[str], new_version_str: str, expected: bool
+) -> None:
     existing_versions = [Version(v_str) for v_str in existing_versions_str]
     new_version = Version(new_version_str)
     validator = NewVersionValidator(new_version, existing_versions)

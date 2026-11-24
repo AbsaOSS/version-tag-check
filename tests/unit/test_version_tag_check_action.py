@@ -17,7 +17,10 @@
 
 import logging
 import os
+from typing import NoReturn
+
 import pytest
+from pytest_mock import MockerFixture
 
 from version_tag_check.utils.constants import ERROR_TAG_ALREADY_EXISTS, ERROR_TAG_DOES_NOT_EXIST, ERROR_TAG_INVALID_FORMAT
 from version_tag_check.version import Version
@@ -31,7 +34,9 @@ from version_tag_check.version_tag_check_action import VersionTagCheckAction
     ("INPUT_GITHUB_REPOSITORY", "Failure: GITHUB_REPOSITORY is not set correctly."),
     ("INPUT_VERSION_TAG", "Failure: VERSION_TAG is not set correctly."),
 ])
-def test_validate_inputs_missing_variables(monkeypatch, caplog, missing_var, error_message):
+def test_validate_inputs_missing_variables(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, missing_var: str, error_message: str
+) -> None:
     # Set all required environment variables
     env_vars = {
         "INPUT_GITHUB_TOKEN": "fake_token",
@@ -73,7 +78,9 @@ def test_validate_inputs_missing_variables(monkeypatch, caplog, missing_var, err
         ("v1.5.2", "false", [Version("v2.0.0"), Version("v1.5.1")]),         # Backport increment
     ],
 )
-def test_run_successful_should_not_exist(mocker, version_tag, should_exist, existing_tags):
+def test_run_successful_should_not_exist(
+    mocker: MockerFixture, version_tag: str, should_exist: str, existing_tags: list[Version]
+) -> None:
     # Set environment variables
     env_vars = {
         "INPUT_GITHUB_TOKEN": "fake_token",
@@ -104,7 +111,9 @@ def test_run_successful_should_not_exist(mocker, version_tag, should_exist, exis
         ("v0.0.1", "true", [Version("v0.0.1")]),                             # check existence of tag - should exist
     ],
 )
-def test_run_successful_should_exist(mocker, version_tag, should_exist, existing_tags):
+def test_run_successful_should_exist(
+    mocker: MockerFixture, version_tag: str, should_exist: str, existing_tags: list[Version]
+) -> None:
     # Set environment variables
     env_vars = {
         "INPUT_GITHUB_TOKEN": "fake_token",
@@ -140,7 +149,17 @@ def test_run_successful_should_exist(mocker, version_tag, should_exist, existing
         ("v3.0.1", "false", [Version("v2.9.9"), Version("v1.0.0")], True, False, 1, "New tag v3.0.1 is not a valid major bump. Latest version: v2.9.9."),        # Invalid version gap
     ],
 )
-def test_run_unsuccessful(mocker, caplog, version_tag, should_exist, existing_tags, is_valid_format, is_valid_increment, expected_exit_code, error_message):
+def test_run_unsuccessful(
+    mocker: MockerFixture,
+    caplog: pytest.LogCaptureFixture,
+    version_tag: str,
+    should_exist: str,
+    existing_tags: list[Version],
+    is_valid_format: bool,
+    is_valid_increment: bool,
+    expected_exit_code: int,
+    error_message: str,
+) -> None:
     # Set environment variables
     env_vars = {
         "INPUT_GITHUB_TOKEN": "fake_token",
@@ -151,7 +170,7 @@ def test_run_unsuccessful(mocker, caplog, version_tag, should_exist, existing_ta
     os.environ.update(env_vars)
 
     # Mock sys.exit to raise a SystemExit for assertion
-    def mock_exit(code):
+    def mock_exit(code: int) -> NoReturn:
         raise SystemExit(code)
 
     mocker.patch("sys.exit", mock_exit)
@@ -190,7 +209,9 @@ def test_run_unsuccessful(mocker, caplog, version_tag, should_exist, existing_ta
         ("v1.0.0-HF2", "false", [Version("v1.0.0-HF1")]),                        # HF progression
     ],
 )
-def test_run_successful_with_qualifiers(mocker, version_tag, should_exist, existing_tags):
+def test_run_successful_with_qualifiers(
+    mocker: MockerFixture, version_tag: str, should_exist: str, existing_tags: list[Version]
+) -> None:
     """Test that the action handles version tags with valid qualifiers"""
     # Set environment variables
     env_vars = {
@@ -235,7 +256,9 @@ def test_run_successful_with_qualifiers(mocker, version_tag, should_exist, exist
         ("v1.0.0-RELEASE2", "Invalid qualifier 'RELEASE2'"),
     ],
 )
-def test_run_invalid_qualifier(mocker, caplog, version_tag, expected_error):
+def test_run_invalid_qualifier(
+    mocker: MockerFixture, caplog: pytest.LogCaptureFixture, version_tag: str, expected_error: str
+) -> None:
     """Test that the action rejects version tags with invalid qualifiers"""
     # Set environment variables
     env_vars = {
@@ -247,7 +270,7 @@ def test_run_invalid_qualifier(mocker, caplog, version_tag, expected_error):
     os.environ.update(env_vars)
 
     # Mock sys.exit to raise a SystemExit for assertion
-    def mock_exit(code):
+    def mock_exit(code: int) -> NoReturn:
         raise SystemExit(code)
 
     mocker.patch("sys.exit", mock_exit)
@@ -272,7 +295,7 @@ def test_run_invalid_qualifier(mocker, caplog, version_tag, expected_error):
 
 # Tests for the PEP 440 release candidate "vX.Y.ZrcN"
 
-def _set_inputs(version_tag, should_exist):
+def _set_inputs(version_tag: str, should_exist: str) -> None:
     os.environ.update({
         "INPUT_GITHUB_TOKEN": "fake_token",
         "INPUT_VERSION_TAG": version_tag,
@@ -281,13 +304,13 @@ def _set_inputs(version_tag, should_exist):
     })
 
 
-def _mock_tags(mocker, existing_tags):
+def _mock_tags(mocker: MockerFixture, existing_tags: list[Version]) -> None:
     mock_repository_class = mocker.patch("version_tag_check.version_tag_check_action.GitHubRepository")
     mock_repository_class.return_value.get_all_tags.return_value = existing_tags
 
 
-def _raise_on_exit(mocker):
-    def mock_exit(code):
+def _raise_on_exit(mocker: MockerFixture) -> None:
+    def mock_exit(code: int) -> NoReturn:
         raise SystemExit(code)
 
     mocker.patch("sys.exit", mock_exit)
@@ -305,7 +328,9 @@ def _raise_on_exit(mocker):
         ("v0.9.0-RC1", "true", [Version("v0.9.0rc1")]),                      # Exists in the other spelling
     ],
 )
-def test_run_successful_with_pep440_rc(mocker, version_tag, should_exist, existing_tags):
+def test_run_successful_with_pep440_rc(
+    mocker: MockerFixture, version_tag: str, should_exist: str, existing_tags: list[Version]
+) -> None:
     _set_inputs(version_tag, should_exist)
     _raise_on_exit(mocker)
     _mock_tags(mocker, existing_tags)
@@ -329,7 +354,14 @@ def test_run_successful_with_pep440_rc(mocker, version_tag, should_exist, existi
         ("v0.9.0RC1", "false", [], ERROR_TAG_INVALID_FORMAT),
     ],
 )
-def test_run_unsuccessful_with_pep440_rc(mocker, caplog, version_tag, should_exist, existing_tags, error_message):
+def test_run_unsuccessful_with_pep440_rc(
+    mocker: MockerFixture,
+    caplog: pytest.LogCaptureFixture,
+    version_tag: str,
+    should_exist: str,
+    existing_tags: list[Version],
+    error_message: str,
+) -> None:
     _set_inputs(version_tag, should_exist)
     _raise_on_exit(mocker)
     _mock_tags(mocker, existing_tags)
@@ -351,7 +383,9 @@ def test_run_unsuccessful_with_pep440_rc(mocker, caplog, version_tag, should_exi
         ("v0.9.0rc1", "false", "v0.9.0-RC1"),
     ],
 )
-def test_run_logs_other_spelling_of_found_tag(mocker, caplog, version_tag, should_exist, existing_tag):
+def test_run_logs_other_spelling_of_found_tag(
+    mocker: MockerFixture, caplog: pytest.LogCaptureFixture, version_tag: str, should_exist: str, existing_tag: str
+) -> None:
     _set_inputs(version_tag, should_exist)
     _raise_on_exit(mocker)
     _mock_tags(mocker, [Version(existing_tag)])
@@ -364,7 +398,7 @@ def test_run_logs_other_spelling_of_found_tag(mocker, caplog, version_tag, shoul
     assert f"Tag {version_tag} exists in the repository as {existing_tag}." in caplog.text
 
 
-def test_run_does_not_log_same_spelling_of_found_tag(mocker, caplog):
+def test_run_does_not_log_same_spelling_of_found_tag(mocker: MockerFixture, caplog: pytest.LogCaptureFixture) -> None:
     _set_inputs("v0.9.0rc1", "true")
     _raise_on_exit(mocker)
     _mock_tags(mocker, [Version("v0.9.0rc1")])
@@ -384,7 +418,9 @@ def test_run_does_not_log_same_spelling_of_found_tag(mocker, caplog):
         ["v0.9.0rc1", "v0.9.0-RC1"],
     ],
 )
-def test_run_does_not_log_other_spelling_when_exact_tag_exists(mocker, caplog, existing_tags):
+def test_run_does_not_log_other_spelling_when_exact_tag_exists(
+    mocker: MockerFixture, caplog: pytest.LogCaptureFixture, existing_tags: list[str]
+) -> None:
     _set_inputs("v0.9.0rc1", "true")
     _raise_on_exit(mocker)
     _mock_tags(mocker, [Version(tag) for tag in existing_tags])

@@ -21,13 +21,13 @@ from version_tag_check.version import Version
 
 # is_valid_format
 
-def test_is_valid_format_true():
+def test_is_valid_format_true() -> None:
     version = Version("v10.20.30")
 
     assert version.is_valid_format() is True
 
 
-def test_is_valid_format_false():
+def test_is_valid_format_false() -> None:
     version = Version("v1.2")
 
     assert version.is_valid_format() is False
@@ -35,35 +35,35 @@ def test_is_valid_format_false():
 
 # __eq__
 
-def test_equality_true():
+def test_equality_true() -> None:
     v1 = Version("v1.2.3")
     v2 = Version("v1.2.3")
 
     assert v1 == v2
 
 
-def test_equality_false():
+def test_equality_false() -> None:
     v1 = Version("v1.2.3")
     v2 = Version("v1.2.4")
 
     assert not v1 == v2
 
 
-def test_equality_not_valid():
+def test_equality_not_valid() -> None:
     v1 = Version("x1.2.3")
     v2 = Version("v1.2.4")
 
     assert not v1 == v2
 
 
-def test_equality_other_not_valid():
+def test_equality_other_not_valid() -> None:
     v1 = Version("v1.2.3")
     v2 = Version("x1.2.4")
 
     assert not v1 == v2
 
 
-def test_equality_other_is_none():
+def test_equality_other_is_none() -> None:
     v1 = Version("v1.2.3")
 
     assert not v1 == None
@@ -71,35 +71,35 @@ def test_equality_other_is_none():
 
 # __lt__
 
-def test_less_than_true():
+def test_less_than_true() -> None:
     v1 = Version("v1.2.3")
     v2 = Version("v1.2.4")
 
     assert v1 < v2
 
 
-def test_less_than_false():
+def test_less_than_false() -> None:
     v1 = Version("v2.0.0")
     v2 = Version("v1.9.9")
 
     assert not v1 < v2
 
 
-def test_less_than_not_valid():
+def test_less_than_not_valid() -> None:
     v1 = Version("v2.0.0")
     v2 = Version("x1.9.9")
 
     assert not v2 < v1
 
 
-def test_less_than_other_not_valid():
+def test_less_than_other_not_valid() -> None:
     v1 = Version("x2.0.0")
     v2 = Version("v1.9.9")
 
     assert not v2 < v1
 
 
-def test_less_than_other_is_none():
+def test_less_than_other_is_none() -> None:
     v = Version("v1.9.9")
 
     assert not v < None
@@ -107,35 +107,35 @@ def test_less_than_other_is_none():
 
 # __gt__
 
-def test_greater_than_true():
+def test_greater_than_true() -> None:
     v1 = Version("v1.2.3")
     v2 = Version("v1.2.4")
 
     assert v2 > v1
 
 
-def test_greater_than_false():
+def test_greater_than_false() -> None:
     v1 = Version("v2.0.0")
     v2 = Version("v1.9.9")
 
     assert not v2 > v1
 
 
-def test_greater_than_not_valid():
+def test_greater_than_not_valid() -> None:
     v1 = Version("v2.0.0")
     v2 = Version("x1.9.9")
 
     assert not v1 > v2
 
 
-def test_greater_than_other_not_valid():
+def test_greater_than_other_not_valid() -> None:
     v1 = Version("x2.0.0")
     v2 = Version("v1.9.9")
 
     assert not v1 > v2
 
 
-def test_greater_than_other_is_none():
+def test_greater_than_other_is_none() -> None:
     v = Version("v1.9.9")
 
     assert not v > None
@@ -143,7 +143,7 @@ def test_greater_than_other_is_none():
 
 # __str__
 
-def test_str_representation_no_v_prefix():
+def test_str_representation_no_v_prefix() -> None:
     version_str = "1.2.3"
     version = Version(version_str)
 
@@ -151,7 +151,7 @@ def test_str_representation_no_v_prefix():
     assert str(version) == "vx.x.x"
 
 
-def test_str_representation_v_prefix():
+def test_str_representation_v_prefix() -> None:
     version_str = "v1.2.3"
     version = Version(version_str)
 
@@ -160,7 +160,7 @@ def test_str_representation_v_prefix():
 
 # Qualifier parsing tests
 
-def test_parse_version_without_qualifier():
+def test_parse_version_without_qualifier() -> None:
     version = Version("v1.0.0")
     
     assert version.is_valid_format() is True
@@ -171,7 +171,7 @@ def test_parse_version_without_qualifier():
     assert str(version) == "v1.0.0"
 
 
-def test_parse_version_with_snapshot():
+def test_parse_version_with_snapshot() -> None:
     version = Version("v1.0.0-SNAPSHOT")
     
     assert version.is_valid_format() is True
@@ -182,7 +182,7 @@ def test_parse_version_with_snapshot():
     assert str(version) == "v1.0.0-SNAPSHOT"
 
 
-def test_parse_version_with_alpha():
+def test_parse_version_with_alpha() -> None:
     version = Version("v1.0.0-ALPHA")
     
     assert version.is_valid_format() is True
@@ -190,7 +190,7 @@ def test_parse_version_with_alpha():
     assert str(version) == "v1.0.0-ALPHA"
 
 
-def test_parse_version_with_beta():
+def test_parse_version_with_beta() -> None:
     version = Version("v1.0.0-BETA")
     
     assert version.is_valid_format() is True
@@ -198,7 +198,7 @@ def test_parse_version_with_beta():
     assert str(version) == "v1.0.0-BETA"
 
 
-def test_parse_version_with_rc1():
+def test_parse_version_with_rc1() -> None:
     version = Version("v1.0.0-RC1")
     
     assert version.is_valid_format() is True
@@ -206,7 +206,7 @@ def test_parse_version_with_rc1():
     assert str(version) == "v1.0.0-RC1"
 
 
-def test_parse_version_with_rc10():
+def test_parse_version_with_rc10() -> None:
     version = Version("v1.0.0-RC10")
     
     assert version.is_valid_format() is True
@@ -214,7 +214,7 @@ def test_parse_version_with_rc10():
     assert str(version) == "v1.0.0-RC10"
 
 
-def test_parse_version_with_release():
+def test_parse_version_with_release() -> None:
     version = Version("v1.0.0-RELEASE")
     
     assert version.is_valid_format() is True
@@ -222,7 +222,7 @@ def test_parse_version_with_release():
     assert str(version) == "v1.0.0-RELEASE"
 
 
-def test_parse_version_with_hf1():
+def test_parse_version_with_hf1() -> None:
     version = Version("v1.0.0-HF1")
     
     assert version.is_valid_format() is True
@@ -230,7 +230,7 @@ def test_parse_version_with_hf1():
     assert str(version) == "v1.0.0-HF1"
 
 
-def test_parse_version_with_hf10():
+def test_parse_version_with_hf10() -> None:
     version = Version("v1.0.0-HF10")
     
     assert version.is_valid_format() is True
@@ -238,21 +238,21 @@ def test_parse_version_with_hf10():
     assert str(version) == "v1.0.0-HF10"
 
 
-def test_parse_version_with_lowercase_qualifier_invalid():
+def test_parse_version_with_lowercase_qualifier_invalid() -> None:
     version = Version("v1.0.0-snapshot")
     
     # The regex will reject lowercase qualifiers
     assert version.is_valid_format() is False
 
 
-def test_parse_version_with_empty_qualifier_invalid():
+def test_parse_version_with_empty_qualifier_invalid() -> None:
     version = Version("v1.0.0-")
     
     # The regex requires at least one character after hyphen
     assert version.is_valid_format() is False
 
 
-def test_parse_version_with_multiple_hyphens_invalid():
+def test_parse_version_with_multiple_hyphens_invalid() -> None:
     version = Version("v1.0.0-RC1-SNAPSHOT")
     
     # The regex [A-Z0-9]+ doesn't match hyphens, so this will be invalid
@@ -261,7 +261,7 @@ def test_parse_version_with_multiple_hyphens_invalid():
 
 # Qualifier validation tests
 
-def test_validate_qualifier_none():
+def test_validate_qualifier_none() -> None:
     version = Version("v1.0.0")
     is_valid, error = version.is_valid_qualifier()
     
@@ -269,7 +269,7 @@ def test_validate_qualifier_none():
     assert error is None
 
 
-def test_validate_qualifier_snapshot():
+def test_validate_qualifier_snapshot() -> None:
     version = Version("v1.0.0-SNAPSHOT")
     is_valid, error = version.is_valid_qualifier()
     
@@ -277,7 +277,7 @@ def test_validate_qualifier_snapshot():
     assert error is None
 
 
-def test_validate_qualifier_alpha():
+def test_validate_qualifier_alpha() -> None:
     version = Version("v1.0.0-ALPHA")
     is_valid, error = version.is_valid_qualifier()
     
@@ -285,7 +285,7 @@ def test_validate_qualifier_alpha():
     assert error is None
 
 
-def test_validate_qualifier_beta():
+def test_validate_qualifier_beta() -> None:
     version = Version("v1.0.0-BETA")
     is_valid, error = version.is_valid_qualifier()
     
@@ -293,7 +293,7 @@ def test_validate_qualifier_beta():
     assert error is None
 
 
-def test_validate_qualifier_release():
+def test_validate_qualifier_release() -> None:
     version = Version("v1.0.0-RELEASE")
     is_valid, error = version.is_valid_qualifier()
     
@@ -301,7 +301,7 @@ def test_validate_qualifier_release():
     assert error is None
 
 
-def test_validate_qualifier_rc1():
+def test_validate_qualifier_rc1() -> None:
     version = Version("v1.0.0-RC1")
     is_valid, error = version.is_valid_qualifier()
     
@@ -309,7 +309,7 @@ def test_validate_qualifier_rc1():
     assert error is None
 
 
-def test_validate_qualifier_rc2():
+def test_validate_qualifier_rc2() -> None:
     version = Version("v1.0.0-RC2")
     is_valid, error = version.is_valid_qualifier()
     
@@ -317,7 +317,7 @@ def test_validate_qualifier_rc2():
     assert error is None
 
 
-def test_validate_qualifier_rc99():
+def test_validate_qualifier_rc99() -> None:
     version = Version("v1.0.0-RC99")
     is_valid, error = version.is_valid_qualifier()
     
@@ -325,7 +325,7 @@ def test_validate_qualifier_rc99():
     assert error is None
 
 
-def test_validate_qualifier_hf1():
+def test_validate_qualifier_hf1() -> None:
     version = Version("v1.0.0-HF1")
     is_valid, error = version.is_valid_qualifier()
     
@@ -333,7 +333,7 @@ def test_validate_qualifier_hf1():
     assert error is None
 
 
-def test_validate_qualifier_hf2():
+def test_validate_qualifier_hf2() -> None:
     version = Version("v1.0.0-HF2")
     is_valid, error = version.is_valid_qualifier()
     
@@ -341,7 +341,7 @@ def test_validate_qualifier_hf2():
     assert error is None
 
 
-def test_validate_qualifier_hf99():
+def test_validate_qualifier_hf99() -> None:
     version = Version("v1.0.0-HF99")
     is_valid, error = version.is_valid_qualifier()
     
@@ -349,123 +349,134 @@ def test_validate_qualifier_hf99():
     assert error is None
 
 
-def test_validate_qualifier_lowercase_snapshot_invalid():
+def test_validate_qualifier_lowercase_snapshot_invalid() -> None:
     version = Version("v1.0.0-snapshot")
     # This won't parse at all
     assert version.is_valid_format() is False
 
 
-def test_validate_qualifier_lowercase_alpha_invalid():
+def test_validate_qualifier_lowercase_alpha_invalid() -> None:
     version = Version("v1.0.0-alpha")
     # This won't parse at all
     assert version.is_valid_format() is False
 
 
-def test_validate_qualifier_lowercase_rc1_invalid():
+def test_validate_qualifier_lowercase_rc1_invalid() -> None:
     version = Version("v1.0.0-rc1")
     # This won't parse at all
     assert version.is_valid_format() is False
 
 
-def test_validate_qualifier_lowercase_hf1_invalid():
+def test_validate_qualifier_lowercase_hf1_invalid() -> None:
     version = Version("v1.0.0-hf1")
     # This won't parse at all
     assert version.is_valid_format() is False
 
 
-def test_validate_qualifier_rc_without_number_invalid():
+def test_validate_qualifier_rc_without_number_invalid() -> None:
     version = Version("v1.0.0-RC")
     is_valid, error = version.is_valid_qualifier()
     
     assert is_valid is False
+    assert error is not None
     assert "Invalid qualifier 'RC'" in error
     assert "RC1-RC99" in error
 
 
-def test_validate_qualifier_rc0_invalid():
+def test_validate_qualifier_rc0_invalid() -> None:
     version = Version("v1.0.0-RC0")
     is_valid, error = version.is_valid_qualifier()
     
     assert is_valid is False
+    assert error is not None
     assert "Invalid qualifier 'RC0'" in error
 
 
-def test_validate_qualifier_rc001_invalid():
+def test_validate_qualifier_rc001_invalid() -> None:
     version = Version("v1.0.0-RC001")
     is_valid, error = version.is_valid_qualifier()
     
     assert is_valid is False
+    assert error is not None
     assert "Invalid qualifier 'RC001'" in error
 
 
-def test_validate_qualifier_rc100_invalid():
+def test_validate_qualifier_rc100_invalid() -> None:
     version = Version("v1.0.0-RC100")
     is_valid, error = version.is_valid_qualifier()
     
     assert is_valid is False
+    assert error is not None
     assert "Invalid qualifier 'RC100'" in error
 
 
-def test_validate_qualifier_hf_without_number_invalid():
+def test_validate_qualifier_hf_without_number_invalid() -> None:
     version = Version("v1.0.0-HF")
     is_valid, error = version.is_valid_qualifier()
     
     assert is_valid is False
+    assert error is not None
     assert "Invalid qualifier 'HF'" in error
     assert "HF1-HF99" in error
 
 
-def test_validate_qualifier_hf0_invalid():
+def test_validate_qualifier_hf0_invalid() -> None:
     version = Version("v1.0.0-HF0")
     is_valid, error = version.is_valid_qualifier()
     
     assert is_valid is False
+    assert error is not None
     assert "Invalid qualifier 'HF0'" in error
 
 
-def test_validate_qualifier_hf001_invalid():
+def test_validate_qualifier_hf001_invalid() -> None:
     version = Version("v1.0.0-HF001")
     is_valid, error = version.is_valid_qualifier()
     
     assert is_valid is False
+    assert error is not None
     assert "Invalid qualifier 'HF001'" in error
 
 
-def test_validate_qualifier_hf100_invalid():
+def test_validate_qualifier_hf100_invalid() -> None:
     version = Version("v1.0.0-HF100")
     is_valid, error = version.is_valid_qualifier()
     
     assert is_valid is False
+    assert error is not None
     assert "Invalid qualifier 'HF100'" in error
 
 
-def test_validate_qualifier_snapshot1_invalid():
+def test_validate_qualifier_snapshot1_invalid() -> None:
     version = Version("v1.0.0-SNAPSHOT1")
     is_valid, error = version.is_valid_qualifier()
     
     assert is_valid is False
+    assert error is not None
     assert "Invalid qualifier 'SNAPSHOT1'" in error
 
 
-def test_validate_qualifier_beta1_invalid():
+def test_validate_qualifier_beta1_invalid() -> None:
     version = Version("v1.0.0-BETA1")
     is_valid, error = version.is_valid_qualifier()
     
     assert is_valid is False
+    assert error is not None
     assert "Invalid qualifier 'BETA1'" in error
 
 
-def test_validate_qualifier_unknown_invalid():
+def test_validate_qualifier_unknown_invalid() -> None:
     version = Version("v1.0.0-UNKNOWN")
     is_valid, error = version.is_valid_qualifier()
     
     assert is_valid is False
+    assert error is not None
     assert "Invalid qualifier 'UNKNOWN'" in error
 
 
 # Qualifier comparison tests
 
-def test_comparison_numeric_precedence_over_qualifier():
+def test_comparison_numeric_precedence_over_qualifier() -> None:
     """Test that numeric version takes precedence over qualifiers"""
     v1 = Version("v2.0.0-SNAPSHOT")
     v2 = Version("v1.9.9-RELEASE")
@@ -475,7 +486,7 @@ def test_comparison_numeric_precedence_over_qualifier():
     assert not v1 == v2
 
 
-def test_comparison_same_numeric_different_qualifiers():
+def test_comparison_same_numeric_different_qualifiers() -> None:
     """Test qualifier precedence for same numeric version"""
     snapshot = Version("v1.0.0-SNAPSHOT")
     alpha = Version("v1.0.0-ALPHA")
@@ -501,7 +512,7 @@ def test_comparison_same_numeric_different_qualifiers():
     assert bare < hf1
 
 
-def test_comparison_rc_numeric_ordering():
+def test_comparison_rc_numeric_ordering() -> None:
     """Test that RC qualifiers are ordered numerically, not lexically"""
     rc1 = Version("v1.0.0-RC1")
     rc2 = Version("v1.0.0-RC2")
@@ -511,7 +522,7 @@ def test_comparison_rc_numeric_ordering():
     assert rc10 > rc2 > rc1
 
 
-def test_comparison_hf_numeric_ordering():
+def test_comparison_hf_numeric_ordering() -> None:
     """Test that HF qualifiers are ordered numerically, not lexically"""
     hf1 = Version("v1.0.0-HF1")
     hf2 = Version("v1.0.0-HF2")
@@ -521,7 +532,7 @@ def test_comparison_hf_numeric_ordering():
     assert hf10 > hf2 > hf1
 
 
-def test_comparison_hotfix_after_bare_version():
+def test_comparison_hotfix_after_bare_version() -> None:
     """Test that hotfix versions come after the bare version"""
     bare = Version("v1.0.0")
     hf1 = Version("v1.0.0-HF1")
@@ -530,7 +541,7 @@ def test_comparison_hotfix_after_bare_version():
     assert bare < hf1 < hf2
 
 
-def test_comparison_full_progression():
+def test_comparison_full_progression() -> None:
     """Test the full qualifier progression from spec section 4.2"""
     versions = [
         Version("v1.0.0-SNAPSHOT"),
@@ -547,7 +558,7 @@ def test_comparison_full_progression():
         assert versions[i] < versions[i + 1], f"{versions[i]} should be < {versions[i + 1]}"
 
 
-def test_comparison_with_hotfixes():
+def test_comparison_with_hotfixes() -> None:
     """Test version progression including hotfixes"""
     versions = [
         Version("v1.0.0-RC1"),
@@ -562,7 +573,7 @@ def test_comparison_with_hotfixes():
         assert versions[i] < versions[i + 1], f"{versions[i]} should be < {versions[i + 1]}"
 
 
-def test_comparison_equality_with_qualifiers():
+def test_comparison_equality_with_qualifiers() -> None:
     """Test equality comparison with qualifiers"""
     v1 = Version("v1.0.0-SNAPSHOT")
     v2 = Version("v1.0.0-SNAPSHOT")
@@ -573,7 +584,7 @@ def test_comparison_equality_with_qualifiers():
     assert not v2 == v3
 
 
-def test_comparison_equality_bare_versions():
+def test_comparison_equality_bare_versions() -> None:
     """Test that bare versions are still equal"""
     v1 = Version("v1.0.0")
     v2 = Version("v1.0.0")
@@ -581,7 +592,7 @@ def test_comparison_equality_bare_versions():
     assert v1 == v2
 
 
-def test_comparison_cross_version_with_qualifiers():
+def test_comparison_cross_version_with_qualifiers() -> None:
     """Test comparisons across different numeric versions with qualifiers"""
     v1 = Version("v1.0.0-ALPHA")
     v2 = Version("v1.0.0-BETA")
@@ -591,7 +602,7 @@ def test_comparison_cross_version_with_qualifiers():
     assert v1 < v2 < v3 < v4
 
 
-def test_comparison_rc99_and_release():
+def test_comparison_rc99_and_release() -> None:
     """Test boundary condition: RC99 < RELEASE"""
     rc99 = Version("v1.0.0-RC99")
     release = Version("v1.0.0-RELEASE")
@@ -599,7 +610,7 @@ def test_comparison_rc99_and_release():
     assert rc99 < release
 
 
-def test_comparison_hf99_boundary():
+def test_comparison_hf99_boundary() -> None:
     """Test boundary condition: HF99 is valid and compares correctly"""
     hf1 = Version("v1.0.0-HF1")
     hf99 = Version("v1.0.0-HF99")
@@ -609,7 +620,7 @@ def test_comparison_hf99_boundary():
 
 # PEP 440 release candidate "vX.Y.ZrcN"
 
-def test_parse_pep440_rc1():
+def test_parse_pep440_rc1() -> None:
     version = Version("v0.9.0rc1")
 
     assert version.is_valid_format() is True
@@ -620,7 +631,7 @@ def test_parse_pep440_rc1():
     assert str(version) == "v0.9.0rc1"
 
 
-def test_parse_pep440_rc99():
+def test_parse_pep440_rc99() -> None:
     version = Version("v0.9.0rc99")
 
     assert version.is_valid_format() is True
@@ -628,7 +639,7 @@ def test_parse_pep440_rc99():
     assert str(version) == "v0.9.0rc99"
 
 
-def test_validate_qualifier_pep440_rc():
+def test_validate_qualifier_pep440_rc() -> None:
     version = Version("v0.9.0rc1")
     is_valid, error = version.is_valid_qualifier()
 
@@ -660,13 +671,13 @@ def test_validate_qualifier_pep440_rc():
         "0.9.0rc1",        # v prefix required
     ],
 )
-def test_parse_pep440_rc_invalid(version_str):
+def test_parse_pep440_rc_invalid(version_str: str) -> None:
     version = Version(version_str)
 
     assert version.is_valid_format() is False
 
 
-def test_pep440_rc_equals_hyphen_rc():
+def test_pep440_rc_equals_hyphen_rc() -> None:
     assert Version("v0.9.0rc1") == Version("v0.9.0-RC1")
     assert Version("v0.9.0-RC1") == Version("v0.9.0rc1")
     assert not Version("v0.9.0rc1") == Version("v0.9.0-RC2")
@@ -674,12 +685,12 @@ def test_pep440_rc_equals_hyphen_rc():
     assert not Version("v0.9.0rc1") > Version("v0.9.0-RC1")
 
 
-def test_str_keeps_spelling_of_each_rc_form():
+def test_str_keeps_spelling_of_each_rc_form() -> None:
     assert str(Version("v0.9.0rc1")) == "v0.9.0rc1"
     assert str(Version("v0.9.0-RC1")) == "v0.9.0-RC1"
 
 
-def test_comparison_pep440_rc_progression():
+def test_comparison_pep440_rc_progression() -> None:
     versions = [
         Version("v0.8.1"),
         Version("v0.9.0-BETA"),
@@ -696,14 +707,14 @@ def test_comparison_pep440_rc_progression():
         assert versions[i + 1] > versions[i], f"{versions[i + 1]} should be > {versions[i]}"
 
 
-def test_comparison_mixed_rc_history():
+def test_comparison_mixed_rc_history() -> None:
     history = [Version("v0.9.0rc3"), Version("v0.9.0-RC1"), Version("v0.9.0rc2"), Version("v0.8.1")]
 
     assert [str(v) for v in sorted(history)] == ["v0.8.1", "v0.9.0-RC1", "v0.9.0rc2", "v0.9.0rc3"]
     assert str(max(history)) == "v0.9.0rc3"
 
 
-def test_custom_regex_without_pep440_group_keeps_its_qualifier():
+def test_custom_regex_without_pep440_group_keeps_its_qualifier() -> None:
     version = Version("v1.0.0-X+7", version_regex=r"^v(\d+)\.(\d+)\.(\d+)-([A-Z])\+(\d+)$")
 
     assert version.is_valid_format() is True

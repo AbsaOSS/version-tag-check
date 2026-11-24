@@ -19,10 +19,16 @@ import os
 import sys
 
 from logging import StreamHandler
+
+import pytest
+from pytest_mock import MockType
+
 from version_tag_check.utils.logging_config import setup_logging
 
 
-def validate_logging_config(mock_logging_setup, caplog, expected_level, expected_message):
+def validate_logging_config(
+    mock_logging_setup: MockType, caplog: pytest.LogCaptureFixture, expected_level: int, expected_message: str
+) -> None:
     mock_logging_setup.assert_called_once()
 
     # Get the actual call arguments from the mock
@@ -45,14 +51,14 @@ def validate_logging_config(mock_logging_setup, caplog, expected_level, expected
 
 # setup_logging
 
-def test_setup_logging_default_logging_level(mock_logging_setup, caplog):
+def test_setup_logging_default_logging_level(mock_logging_setup: MockType, caplog: pytest.LogCaptureFixture) -> None:
     with caplog.at_level(logging.INFO):
         setup_logging()
 
     validate_logging_config(mock_logging_setup, caplog, logging.INFO, "Logging configuration set up.")
 
 
-def test_setup_logging_debug_mode_enabled_by_ci(mock_logging_setup, caplog):
+def test_setup_logging_debug_mode_enabled_by_ci(mock_logging_setup: MockType, caplog: pytest.LogCaptureFixture) -> None:
     os.environ["RUNNER_DEBUG"] = "1"
 
     with caplog.at_level(logging.DEBUG):
