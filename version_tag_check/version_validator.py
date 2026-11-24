@@ -41,7 +41,9 @@ class NewVersionValidator:
         @return: None
         """
         self.__new_version: Version = new_version
-        self.__existing_versions: list[Version] = existing_versions
+        self.__existing_versions: list[Version] = [
+            version for version in existing_versions if version.is_valid_format() and version.is_valid_qualifier()[0]
+        ]
 
     def __get_latest_version(self) -> Optional[Version]:
         """

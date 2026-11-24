@@ -50,7 +50,7 @@ class GitHubRepository:
 
     def get_all_tags(self) -> list[Version]:
         """
-        Get all tags for the repository.
+        Get all tags with a supported version format and qualifier for the repository.
 
         @return: A list of Version objects representing the tags
         """
@@ -71,11 +71,9 @@ class GitHubRepository:
                 break
             for tag_info in page_tags:
                 tag_name = tag_info["name"]
-                try:
-                    version = Version(tag_name)
+                version = Version(tag_name)
+                if version.is_valid_format() and version.is_valid_qualifier()[0]:
                     tags.append(version)
-                except ValueError:
-                    pass  # Ignore tags that are not valid versions
             if len(page_tags) < per_page:
                 break
             page += 1
