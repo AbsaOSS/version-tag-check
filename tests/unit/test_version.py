@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+import pytest
+
 from version_tag_check.version import Version
 
 
@@ -603,3 +605,107 @@ def test_comparison_hf99_boundary():
     hf99 = Version("v1.0.0-HF99")
     
     assert hf1 < hf99
+
+
+# PEP 440 release candidate "vX.Y.ZrcN"
+
+def test_parse_pep440_rc1():
+    version = Version("v0.9.0rc1")
+
+    assert version.is_valid_format() is True
+    assert version.major == 0
+    assert version.minor == 9
+    assert version.patch == 0
+    assert version.qualifier == "RC1"
+    assert str(version) == "v0.9.0rc1"
+
+
+def test_parse_pep440_rc99():
+    version = Version("v0.9.0rc99")
+
+    assert version.is_valid_format() is True
+    assert version.qualifier == "RC99"
+    assert str(version) == "v0.9.0rc99"
+
+
+def test_validate_qualifier_pep440_rc():
+    version = Version("v0.9.0rc1")
+    is_valid, error = version.is_valid_qualifier()
+
+    assert is_valid is True
+    assert error is None
+
+
+@pytest.mark.parametrize(
+    "version_str",
+    [
+        "v0.9.0rc0",       # rc0 left out, as RC0
+        "v0.9.0rc100",     # above rc99
+        "v0.9.0rc01",      # PEP 440 normalises away the leading zero
+        "v0.9.0rc",        # number required
+        "v0.9.0-rc1",      # hyphen not in the normalised spelling
+        "v0.9.0.rc1",      # dot not in the normalised spelling
+        "v0.9.0_rc1",      # underscore not in the normalised spelling
+        "v0.9.0RC1",       # uppercase not in the normalised spelling
+        "v0.9.0Rc1",       # mixed case not in the normalised spelling
+        "v0.9.0c1",        # PEP 440 alternative spelling of rc
+        "v0.9.0pre1",      # PEP 440 alternative spelling of rc
+        "v0.9.0a1",        # PEP 440 alpha not supported
+        "v0.9.0b1",        # PEP 440 beta not supported
+        "v0.9.0rc1.post1",  # PEP 440 post-release not supported
+        "v0.9.0rc1.dev1",  # PEP 440 development release not supported
+        "v0.9.0rc1+local",  # PEP 440 local version not supported
+        "v0.9.0rc1-SNAPSHOT",  # combined qualifiers
+        "v0.9.0-RC1rc1",   # combined spellings
+        "0.9.0rc1",        # v prefix required
+    ],
+)
+def test_parse_pep440_rc_invalid(version_str):
+    version = Version(version_str)
+
+    assert version.is_valid_format() is False
+
+
+def test_pep440_rc_equals_hyphen_rc():
+    assert Version("v0.9.0rc1") == Version("v0.9.0-RC1")
+    assert Version("v0.9.0-RC1") == Version("v0.9.0rc1")
+    assert not Version("v0.9.0rc1") == Version("v0.9.0-RC2")
+    assert not Version("v0.9.0rc1") < Version("v0.9.0-RC1")
+    assert not Version("v0.9.0rc1") > Version("v0.9.0-RC1")
+
+
+def test_str_keeps_spelling_of_each_rc_form():
+    assert str(Version("v0.9.0rc1")) == "v0.9.0rc1"
+    assert str(Version("v0.9.0-RC1")) == "v0.9.0-RC1"
+
+
+def test_comparison_pep440_rc_progression():
+    versions = [
+        Version("v0.8.1"),
+        Version("v0.9.0-BETA"),
+        Version("v0.9.0rc1"),
+        Version("v0.9.0rc2"),
+        Version("v0.9.0rc10"),
+        Version("v0.9.0-RELEASE"),
+        Version("v0.9.0"),
+        Version("v0.9.0-HF1"),
+    ]
+
+    for i in range(len(versions) - 1):
+        assert versions[i] < versions[i + 1], f"{versions[i]} should be < {versions[i + 1]}"
+        assert versions[i + 1] > versions[i], f"{versions[i + 1]} should be > {versions[i]}"
+
+
+def test_comparison_mixed_rc_history():
+    history = [Version("v0.9.0rc3"), Version("v0.9.0-RC1"), Version("v0.9.0rc2"), Version("v0.8.1")]
+
+    assert [str(v) for v in sorted(history)] == ["v0.8.1", "v0.9.0-RC1", "v0.9.0rc2", "v0.9.0rc3"]
+    assert str(max(history)) == "v0.9.0rc3"
+
+
+def test_custom_regex_without_pep440_group_keeps_its_qualifier():
+    version = Version("v1.0.0-X+7", version_regex=r"^v(\d+)\.(\d+)\.(\d+)-([A-Z])\+(\d+)$")
+
+    assert version.is_valid_format() is True
+    assert version.qualifier == "X"
+    assert str(version) == "v1.0.0-X"

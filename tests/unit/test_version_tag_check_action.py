@@ -19,7 +19,7 @@ import logging
 import os
 import pytest
 
-from version_tag_check.utils.constants import ERROR_TAG_ALREADY_EXISTS, ERROR_TAG_DOES_NOT_EXIST
+from version_tag_check.utils.constants import ERROR_TAG_ALREADY_EXISTS, ERROR_TAG_DOES_NOT_EXIST, ERROR_TAG_INVALID_FORMAT
 from version_tag_check.version import Version
 from version_tag_check.version_tag_check_action import VersionTagCheckAction
 
@@ -268,3 +268,131 @@ def test_run_invalid_qualifier(mocker, caplog, version_tag, expected_error):
 
     # Assert error message in logs
     assert expected_error in caplog.text
+
+
+# Tests for the PEP 440 release candidate "vX.Y.ZrcN"
+
+def _set_inputs(version_tag, should_exist):
+    os.environ.update({
+        "INPUT_GITHUB_TOKEN": "fake_token",
+        "INPUT_VERSION_TAG": version_tag,
+        "INPUT_GITHUB_REPOSITORY": "owner/repo",
+        "INPUT_SHOULD_EXIST": should_exist,
+    })
+
+
+def _mock_tags(mocker, existing_tags):
+    mock_repository_class = mocker.patch("version_tag_check.version_tag_check_action.GitHubRepository")
+    mock_repository_class.return_value.get_all_tags.return_value = existing_tags
+
+
+def _raise_on_exit(mocker):
+    def mock_exit(code):
+        raise SystemExit(code)
+
+    mocker.patch("sys.exit", mock_exit)
+
+
+@pytest.mark.parametrize(
+    "version_tag, should_exist, existing_tags",
+    [
+        ("v0.9.0rc1", "false", [Version("v0.8.1")]),                         # Minor increment
+        ("v0.9.0rc2", "false", [Version("v0.9.0rc1")]),                      # RC progression
+        ("v0.9.0", "false", [Version("v0.9.0rc2")]),                         # RC to bare
+        ("v0.9.0rc2", "false", [Version("v0.9.0-RC1")]),                     # Mixed spellings
+        ("v0.9.0rc1", "true", [Version("v0.9.0rc1")]),                       # Exists in the same spelling
+        ("v0.9.0rc1", "true", [Version("v0.9.0-RC1")]),                      # Exists in the other spelling
+        ("v0.9.0-RC1", "true", [Version("v0.9.0rc1")]),                      # Exists in the other spelling
+    ],
+)
+def test_run_successful_with_pep440_rc(mocker, version_tag, should_exist, existing_tags):
+    _set_inputs(version_tag, should_exist)
+    _raise_on_exit(mocker)
+    _mock_tags(mocker, existing_tags)
+
+    action = VersionTagCheckAction()
+    with pytest.raises(SystemExit) as e:
+        action.run()
+
+    assert e.value.code == 0
+
+
+@pytest.mark.parametrize(
+    "version_tag, should_exist, existing_tags, error_message",
+    [
+        ("v0.9.0rc3", "false", [Version("v0.9.0")], "New tag v0.9.0rc3 is not greater than the latest tag v0.9.0."),
+        ("v0.9.0rc1", "false", [Version("v0.9.0-RC1")], ERROR_TAG_ALREADY_EXISTS),          # Same release
+        ("v0.9.0rc1", "true", [Version("v0.9.0rc2")], ERROR_TAG_DOES_NOT_EXIST),
+        ("v0.9.0rc0", "false", [], ERROR_TAG_INVALID_FORMAT),
+        ("v0.9.0rc100", "false", [], ERROR_TAG_INVALID_FORMAT),
+        ("v0.9.0-rc1", "false", [], ERROR_TAG_INVALID_FORMAT),
+        ("v0.9.0RC1", "false", [], ERROR_TAG_INVALID_FORMAT),
+    ],
+)
+def test_run_unsuccessful_with_pep440_rc(mocker, caplog, version_tag, should_exist, existing_tags, error_message):
+    _set_inputs(version_tag, should_exist)
+    _raise_on_exit(mocker)
+    _mock_tags(mocker, existing_tags)
+
+    caplog.set_level(logging.ERROR)
+    action = VersionTagCheckAction()
+    with pytest.raises(SystemExit) as e:
+        action.run()
+
+    assert e.value.code == 1
+    assert error_message in caplog.text
+
+
+@pytest.mark.parametrize(
+    "version_tag, should_exist, existing_tag",
+    [
+        ("v0.9.0rc1", "true", "v0.9.0-RC1"),
+        ("v0.9.0-RC1", "true", "v0.9.0rc1"),
+        ("v0.9.0rc1", "false", "v0.9.0-RC1"),
+    ],
+)
+def test_run_logs_other_spelling_of_found_tag(mocker, caplog, version_tag, should_exist, existing_tag):
+    _set_inputs(version_tag, should_exist)
+    _raise_on_exit(mocker)
+    _mock_tags(mocker, [Version(existing_tag)])
+
+    caplog.set_level(logging.WARNING)
+    action = VersionTagCheckAction()
+    with pytest.raises(SystemExit):
+        action.run()
+
+    assert f"Tag {version_tag} exists in the repository as {existing_tag}." in caplog.text
+
+
+def test_run_does_not_log_same_spelling_of_found_tag(mocker, caplog):
+    _set_inputs("v0.9.0rc1", "true")
+    _raise_on_exit(mocker)
+    _mock_tags(mocker, [Version("v0.9.0rc1")])
+
+    caplog.set_level(logging.WARNING)
+    action = VersionTagCheckAction()
+    with pytest.raises(SystemExit):
+        action.run()
+
+    assert "exists in the repository as" not in caplog.text
+
+
+@pytest.mark.parametrize(
+    "existing_tags",
+    [
+        ["v0.9.0-RC1", "v0.9.0rc1"],
+        ["v0.9.0rc1", "v0.9.0-RC1"],
+    ],
+)
+def test_run_does_not_log_other_spelling_when_exact_tag_exists(mocker, caplog, existing_tags):
+    _set_inputs("v0.9.0rc1", "true")
+    _raise_on_exit(mocker)
+    _mock_tags(mocker, [Version(tag) for tag in existing_tags])
+
+    caplog.set_level(logging.WARNING)
+    action = VersionTagCheckAction()
+    with pytest.raises(SystemExit) as e:
+        action.run()
+
+    assert e.value.code == 0
+    assert "exists in the repository as" not in caplog.text

@@ -30,15 +30,18 @@ logger = logging.getLogger(__name__)
 class Version:
     """
     Class to represent a version and compare it to other versions.
+
+    Besides "vX.Y.Z" and "vX.Y.Z-QUALIFIER", a release candidate may be spelled "vX.Y.ZrcN", the form PEP 440
+    normalises "-RCn" to. It is parsed as the RC qualifier, so both spellings are one release.
     """
 
-    VERSION_REGEX = r"^v(\d+)\.(\d+)\.(\d+)(?:-([A-Z0-9]+))?$"
+    VERSION_REGEX = r"^v(\d+)\.(\d+)\.(\d+)(?:-([A-Z0-9]+)|rc(?P<pep440_rc>[1-9][0-9]?))?$"
 
     def __init__(self, version_str: str, version_regex: str = VERSION_REGEX) -> None:
         """
         Initialize the Version with the version string.
 
-        @param version_str: The version string in the format "vX.Y.Z" or "vX.Y.Z-QUALIFIER"
+        @param version_str: The version string in the format "vX.Y.Z", "vX.Y.Z-QUALIFIER" or "vX.Y.ZrcN"
         @return: None
         """
         self.__version_regex = version_regex
@@ -47,6 +50,7 @@ class Version:
         self.__minor: Optional[int] = None
         self.__patch: Optional[int] = None
         self.__qualifier: Optional[str] = None
+        self.__pep440_rc: bool = False
         self.__valid: Optional[bool] = None
 
         self.__parse(version_str)
@@ -99,6 +103,11 @@ class Version:
             self.__major, self.__minor, self.__patch = map(int, groups[:3])
             # groups[3] is the optional qualifier group; it's None if not matched
             self.__qualifier = groups[3]
+            # the named group is the number of a PEP 440 release candidate "rcN"; it normalises to the RC qualifier
+            pep440_rc_number = match.groupdict().get("pep440_rc")
+            if pep440_rc_number is not None:
+                self.__qualifier = f"RC{pep440_rc_number}"
+                self.__pep440_rc = True
             self.__valid = True
             logger.info("Version '%s' parsed successfully.", version_str)
         else:
@@ -190,6 +199,8 @@ class Version:
         """
         Compare the Version to another Version.
 
+        Versions compare in normalised form, so "vX.Y.ZrcN" equals "vX.Y.Z-RCn".
+
         @param other: The other Version to compare to
         @return: True if the Versions are equal, False otherwise
         """
@@ -248,7 +259,7 @@ class Version:
 
     def __str__(self) -> str:
         """
-        Get the string representation of the Version.
+        Get the string representation of the Version, in the spelling it was parsed from.
 
         @return: The string representation of the Version
         """
@@ -260,5 +271,7 @@ class Version:
         base = f"v{major}.{minor}.{patch}"
 
         if self.qualifier is not None:
+            if self.__pep440_rc:
+                return f"{base}{self.qualifier.lower()}"
             return f"{base}-{self.qualifier}"
         return base

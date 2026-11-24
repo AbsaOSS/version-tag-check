@@ -116,3 +116,47 @@ def test_is_valid_increment_with_qualifiers(existing_versions_str, new_version_s
     validator = NewVersionValidator(new_version, existing_versions)
 
     assert validator.is_valid_increment() == expected
+
+
+# Test cases for the PEP 440 release candidate "vX.Y.ZrcN"
+pep440_rc_test_cases = [
+    # Increments into a release candidate
+    (["v0.8.1"], "v0.9.0rc1", True),  # Minor increment
+    (["v0.8.1"], "v0.8.2rc1", True),  # Patch increment
+    (["v0.9.0"], "v1.0.0rc1", True),  # Major increment
+    (["v0.8.1"], "v0.10.0rc1", False),  # Skipping minor version
+
+    # Qualifier progressions
+    (["v0.9.0rc1"], "v0.9.0rc2", True),
+    (["v0.9.0rc2"], "v0.9.0", True),
+    (["v0.9.0rc9"], "v0.9.0rc10", True),  # Numeric comparison
+    (["v0.9.0-BETA"], "v0.9.0rc1", True),
+    (["v0.9.0rc2"], "v0.9.0-RELEASE", True),
+
+    # Backwards or equal
+    (["v0.9.0"], "v0.9.0rc3", False),
+    (["v0.9.0rc2"], "v0.9.0rc1", False),
+    (["v0.9.0rc10"], "v0.9.0rc9", False),
+    (["v0.9.0rc1"], "v0.9.0rc1", False),
+
+    # Mixed spellings: one release, ordered together
+    (["v0.9.0-RC1"], "v0.9.0rc1", False),  # Same release
+    (["v0.9.0rc1"], "v0.9.0-RC1", False),  # Same release
+    (["v0.9.0-RC1"], "v0.9.0rc2", True),
+    (["v0.9.0rc2"], "v0.9.0-RC3", True),
+    (["v0.9.0-RC3"], "v0.9.0rc2", False),
+    (["v0.8.1", "v0.9.0rc1", "v0.9.0-RC2"], "v0.9.0rc3", True),
+    (["v0.8.1", "v0.9.0rc1", "v0.9.0-RC2"], "v0.9.0", True),
+
+    # Backport patch next to a release candidate of the next minor
+    (["v0.8.1", "v0.9.0rc1"], "v0.8.2", True),
+]
+
+
+@pytest.mark.parametrize("existing_versions_str, new_version_str, expected", pep440_rc_test_cases)
+def test_is_valid_increment_with_pep440_rc(existing_versions_str, new_version_str, expected):
+    existing_versions = [Version(v_str) for v_str in existing_versions_str]
+    new_version = Version(new_version_str)
+    validator = NewVersionValidator(new_version, existing_versions)
+
+    assert validator.is_valid_increment() == expected

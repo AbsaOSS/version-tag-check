@@ -22,7 +22,11 @@ import logging
 import sys
 
 from version_tag_check.github_repository import GitHubRepository
-from version_tag_check.utils.constants import ERROR_TAG_ALREADY_EXISTS, ERROR_TAG_DOES_NOT_EXIST
+from version_tag_check.utils.constants import (
+    ERROR_TAG_ALREADY_EXISTS,
+    ERROR_TAG_DOES_NOT_EXIST,
+    ERROR_TAG_INVALID_FORMAT,
+)
 from version_tag_check.utils.gh_action import get_action_input, set_action_failed
 from version_tag_check.version import Version
 from version_tag_check.version_validator import NewVersionValidator
@@ -59,7 +63,7 @@ class VersionTagCheckAction:
         """
         new_version = Version(self.version_tag_str)
         if not new_version.is_valid_format():
-            set_action_failed('Tag does not match the required format "v[0-9]+.[0-9]+.[0-9]+([-][A-Z0-9]+)?"')
+            set_action_failed(ERROR_TAG_INVALID_FORMAT)
 
         # Validate the qualifier if present
         is_valid_qualifier, qualifier_error = new_version.is_valid_qualifier()
@@ -70,8 +74,11 @@ class VersionTagCheckAction:
         repository: GitHubRepository = GitHubRepository(self.owner, self.repo, self.github_token)
         existing_versions: list[Version] = repository.get_all_tags()
 
-        # check if the tag exists in repository
-        if new_version in existing_versions:
+        # check if the tag exists in repository; versions compare normalised, so "vX.Y.ZrcN" finds "vX.Y.Z-RCn"
+        same_release = [version for version in existing_versions if version == new_version]
+        if same_release:
+            if all(str(version) != str(new_version) for version in same_release):
+                logger.warning("Tag %s exists in the repository as %s.", new_version, same_release[0])
             # it exists, check if not expected
             if not self.should_exist:
                 set_action_failed(ERROR_TAG_ALREADY_EXISTS)
