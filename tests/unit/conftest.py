@@ -14,10 +14,19 @@
 # limitations under the License.
 #
 
+import os
 from collections.abc import Iterator
 
 import pytest
 from pytest_mock import MockerFixture, MockType
+
+
+@pytest.fixture(autouse=True)
+def clean_action_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Fixture to start every unit test without RUNNER_DEBUG or any INPUT_* action input, whatever the runner sets."""
+    monkeypatch.delenv("RUNNER_DEBUG", raising=False)
+    for name in [name for name in os.environ if name.startswith("INPUT_")]:
+        monkeypatch.delenv(name)
 
 
 @pytest.fixture
