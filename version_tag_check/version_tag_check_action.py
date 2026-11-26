@@ -63,7 +63,7 @@ class VersionTagCheckAction:
         """
         new_version = Version(self.version_tag_str)
         if not new_version.is_valid_format():
-            set_action_failed(ERROR_TAG_INVALID_FORMAT)
+            set_action_failed(ERROR_TAG_INVALID_FORMAT.format(tag=self.version_tag_str))
 
         # Validate the qualifier if present
         is_valid_qualifier, qualifier_error = new_version.is_valid_qualifier()
