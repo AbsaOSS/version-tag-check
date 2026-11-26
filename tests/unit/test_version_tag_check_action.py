@@ -331,10 +331,10 @@ def test_run_successful_with_pep440_rc(
         ("v0.9.0rc3", "false", [Version("v0.9.0")], "New tag v0.9.0rc3 is not greater than the latest tag v0.9.0."),
         ("v0.9.0rc1", "false", [Version("v0.9.0-RC1")], ERROR_TAG_ALREADY_EXISTS),          # Same release
         ("v0.9.0rc1", "true", [Version("v0.9.0rc2")], ERROR_TAG_DOES_NOT_EXIST),
-        ("v0.9.0rc0", "false", [], ERROR_TAG_INVALID_FORMAT),
-        ("v0.9.0rc100", "false", [], ERROR_TAG_INVALID_FORMAT),
-        ("v0.9.0-rc1", "false", [], ERROR_TAG_INVALID_FORMAT),
-        ("v0.9.0RC1", "false", [], ERROR_TAG_INVALID_FORMAT),
+        ("v0.9.0rc0", "false", [], ERROR_TAG_INVALID_FORMAT.format(tag="v0.9.0rc0")),
+        ("v0.9.0rc100", "false", [], ERROR_TAG_INVALID_FORMAT.format(tag="v0.9.0rc100")),
+        ("v0.9.0-rc1", "false", [], ERROR_TAG_INVALID_FORMAT.format(tag="v0.9.0-rc1")),
+        ("v0.9.0RC1", "false", [], ERROR_TAG_INVALID_FORMAT.format(tag="v0.9.0RC1")),
     ],
 )
 def test_run_unsuccessful_with_pep440_rc(
@@ -365,6 +365,9 @@ def test_run_unsuccessful_with_pep440_rc(
         ("v0.9.0rc1", "true", "v0.9.0-RC1"),
         ("v0.9.0-RC1", "true", "v0.9.0rc1"),
         ("v0.9.0rc1", "false", "v0.9.0-RC1"),
+        ("v0.9.0rc1", "true", "v00.09.00rc1"),     # str() renders both as "v0.9.0rc1"
+        ("v0.9.0rc1", "true", "v00.09.00-RC1"),    # warning names the tag as spelled
+        ("v00.09.00rc1", "true", "v0.9.0rc1"),
     ],
 )
 def test_run_logs_other_spelling_of_found_tag(

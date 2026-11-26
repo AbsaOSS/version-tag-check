@@ -63,7 +63,7 @@ class VersionTagCheckAction:
         """
         new_version = Version(self.version_tag_str)
         if not new_version.is_valid_format():
-            set_action_failed(ERROR_TAG_INVALID_FORMAT)
+            set_action_failed(ERROR_TAG_INVALID_FORMAT.format(tag=self.version_tag_str))
 
         # Validate the qualifier if present
         is_valid_qualifier, qualifier_error = new_version.is_valid_qualifier()
@@ -77,8 +77,9 @@ class VersionTagCheckAction:
         # check if the tag exists in repository; versions compare normalised, so "vX.Y.ZrcN" finds "vX.Y.Z-RCn"
         same_release = [version for version in existing_versions if version == new_version]
         if same_release:
-            if all(str(version) != str(new_version) for version in same_release):
-                logger.warning("Tag %s exists in the repository as %s.", new_version, same_release[0])
+            # compare the tags as spelled, as str() drops leading zeros
+            if all(version.tag_name != self.version_tag_str for version in same_release):
+                logger.warning("Tag %s exists in the repository as %s.", self.version_tag_str, same_release[0].tag_name)
             # it exists, check if not expected
             if not self.should_exist:
                 set_action_failed(ERROR_TAG_ALREADY_EXISTS)

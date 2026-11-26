@@ -22,6 +22,6 @@ This module contains the constants used in the version tag check action.
 ERROR_TAG_ALREADY_EXISTS = "The tag already exists in the repository."
 ERROR_TAG_DOES_NOT_EXIST = "The tag does not exist in the repository."
 ERROR_TAG_INVALID_FORMAT = (
-    'Tag does not match the required format "v[0-9]+.[0-9]+.[0-9]+([-][A-Z0-9]+)?" '
-    'or the PEP 440 release candidate form "v[0-9]+.[0-9]+.[0-9]+rc[1-9][0-9]?"'
+    "Invalid version tag '{tag}'. Expected vX.Y.Z, vX.Y.Z-QUALIFIER or vX.Y.ZrcN, "
+    "e.g. v1.2.3, v1.2.3-RC1 or v1.2.3rc1."
 )

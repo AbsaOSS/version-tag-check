@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 @total_ordering
-class Version:
+class Version:  # pylint: disable=too-many-instance-attributes
     """
     Class to represent a version and compare it to other versions.
 
@@ -46,6 +46,7 @@ class Version:
         """
         self.__version_regex = version_regex
 
+        self.__tag_name: str = version_str
         self.__major: Optional[int] = None
         self.__minor: Optional[int] = None
         self.__patch: Optional[int] = None
@@ -90,6 +91,15 @@ class Version:
         @return: The qualifier string, or None if no qualifier is present
         """
         return self.__qualifier
+
+    @property
+    def tag_name(self) -> str:
+        """
+        Get the tag exactly as it was spelled, e.g. "v00.09.00rc1", which str() would render as "v0.9.0rc1".
+
+        @return: The version string the Version was created from
+        """
+        return self.__tag_name
 
     def __parse(self, version_str: str) -> None:
         """
@@ -259,7 +269,8 @@ class Version:
 
     def __str__(self) -> str:
         """
-        Get the string representation of the Version, in the spelling it was parsed from.
+        Get the string representation of the Version. The numbers are normalised, so leading zeros are dropped,
+        but a release candidate keeps the spelling it was parsed from ("-RCn" or "rcN").
 
         @return: The string representation of the Version
         """
