@@ -69,6 +69,12 @@ def test_equality_other_is_none() -> None:
     assert not v1 == None
 
 
+def test_equality_other_is_not_version() -> None:
+    v1 = Version("v1.2.3")
+
+    assert not v1 == "v1.2.3"
+
+
 # __lt__
 
 def test_less_than_true() -> None:

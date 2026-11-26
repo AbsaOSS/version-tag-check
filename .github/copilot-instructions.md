@@ -18,7 +18,7 @@ Coding guidelines
 Python and style
 - Target Python 3.11 or later
 - Follow the current patterns in version_tag_check
-- Add type hints for new public functions and classes
+- Type every function and method: parameter types and a return type; mypy fails on a missing hint
 - Use logging, not print, and keep logging wired through version_tag_check.utils.logging_config
 
 Testing

@@ -8,9 +8,6 @@ omit = ["tests/*", "main.py", "version_tag_check/github_repository.py"]
 
 [tool.mypy]
 check_untyped_defs = true
-
-[[tool.mypy.overrides]]
-module = "tests.*"
 disallow_untyped_defs = true
 
 [tool.pytest.ini_options]

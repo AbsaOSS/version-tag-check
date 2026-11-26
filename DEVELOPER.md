@@ -167,8 +167,8 @@ tool which is a static type checker for Python.
 
 The mypy configuration is in the `pyproject.toml` file.
 
-mypy also checks the `tests/` directory. The `tests.*` override in `pyproject.toml` sets `disallow_untyped_defs`,
-so every test function, fixture and helper needs parameter types and a return type (`-> None` for a test).
+mypy checks the whole repository, the `tests/` directory included. `pyproject.toml` sets `disallow_untyped_defs`,
+so every function, method, test, fixture and helper needs parameter types and a return type (`-> None` for a test).
 
 ### Run my[py]
 
