@@ -349,6 +349,9 @@ def test_run_unsuccessful_with_pep440_rc(mocker, caplog, version_tag, should_exi
         ("v0.9.0rc1", "true", "v0.9.0-RC1"),
         ("v0.9.0-RC1", "true", "v0.9.0rc1"),
         ("v0.9.0rc1", "false", "v0.9.0-RC1"),
+        ("v0.9.0rc1", "true", "v00.09.00rc1"),     # str() renders both as "v0.9.0rc1"
+        ("v0.9.0rc1", "true", "v00.09.00-RC1"),    # warning names the tag as spelled
+        ("v00.09.00rc1", "true", "v0.9.0rc1"),
     ],
 )
 def test_run_logs_other_spelling_of_found_tag(mocker, caplog, version_tag, should_exist, existing_tag):

@@ -679,6 +679,18 @@ def test_str_keeps_spelling_of_each_rc_form():
     assert str(Version("v0.9.0-RC1")) == "v0.9.0-RC1"
 
 
+@pytest.mark.parametrize(
+    "version_str",
+    ["v0.9.0rc1", "v0.9.0-RC1", "v00.09.00rc1", "v00.09.00-RC1", "1.2.3"],
+)
+def test_tag_name_keeps_spelling(version_str):
+    assert Version(version_str).tag_name == version_str
+
+
+def test_str_drops_leading_zeros():
+    assert str(Version("v00.09.00rc1")) == "v0.9.0rc1"
+
+
 def test_comparison_pep440_rc_progression():
     versions = [
         Version("v0.8.1"),
