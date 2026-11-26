@@ -28,7 +28,7 @@ Testing
 	tests/unit/test_version.py
 	tests/unit/test_version_validator.py
 	tests/unit/test_version_tag_check_action.py
-- Type every test function, fixture and helper: parameter types and `-> None`; mypy checks tests/ and fails on a missing hint
+- Type every test function, fixture and helper: parameter types and a return type (`-> None` for a test); mypy checks tests/ and fails on a missing hint
 - Mock GitHubRepository and environment variables; do not call the real GitHub API in unit tests
 
 Tooling
