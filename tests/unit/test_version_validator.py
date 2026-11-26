@@ -22,6 +22,20 @@ import pytest
 from version_tag_check.version import Version
 from version_tag_check.version_validator import NewVersionValidator
 
+
+@pytest.mark.parametrize("invalid_tag", ["latest", "v1", "1.0.0", "v9.0.0-FOO", "v9.0.0-RC0"])
+@pytest.mark.parametrize("new_tag, expected", [("v1.0.1", True), ("v1.1.0", True), ("v2.0.0", True), ("v3.0.0", False)])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_invalid_existing_versions_are_ignored(invalid_tag, new_tag, expected, reverse):
+    versions = [Version(invalid_tag), Version("v1.0.0")]
+    if reverse:
+        versions.reverse()
+    assert NewVersionValidator(Version(new_tag), versions).is_valid_increment() == expected
+
+
+def test_only_invalid_existing_versions_allow_first_release():
+    assert NewVersionValidator(Version("v1.0.0"), [Version("latest"), Version("v9.0.0-FOO")]).is_valid_increment()
+
 # Test cases in the format: (existing_versions, new_version, expected_result)
 test_cases = [
     ([], "v1.0.0", True),  # No existing versions; any version is valid
