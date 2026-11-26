@@ -52,8 +52,8 @@ This action is designed to help maintainers and contributors ensure that version
 
 The action performs three sequential checks:
 
-- **Tag format check** – ensures the tag follows semantic versioning and starts with `v`, e.g., `v1.2.3`.
-- **Presence check** – determines whether the version tag is present in the target GitHub repository.
+- **Tag format check** – ensures the tag follows semantic versioning and starts with `v`, e.g., `v1.2.3`, or is a [PEP 440 release candidate](#pep-440-release-candidates), e.g., `v1.2.3rc1`.
+- **Presence check** – determines whether the version tag is present in the target GitHub repository. `v1.2.3rc1` and `v1.2.3-RC1` count as the same release.
 - **Increment check** – verifies that the provided version tag is a valid increment over the latest existing version.
   - ⚠️ This step is **only performed** when `should-exist=false`.
 
@@ -104,6 +104,25 @@ See the default action step definition:
 #### Hotfix Qualifiers
 - `v1.0.0-HF1` to `v1.0.0-HF99` - Hotfixes (e.g., HF1, HF2, ..., HF99)
 
+#### PEP 440 Release Candidates
+- `v1.0.0rc1` to `v1.0.0rc99` - Release candidates in the normalised spelling of [PEP 440](https://peps.python.org/pep-0440/)
+
+PEP 440 is the version standard of Python packaging. It normalises every pre-release to lowercase with no separator,
+so a package versioned `1.0.0-RC1` is built, published and installed as `1.0.0rc1`: pip, PyPI, the wheel file name and
+`importlib.metadata.version()` all show `1.0.0rc1`. A repository that tags `v` plus its package version keeps one
+spelling per release only if the tag accepts that normalised form; otherwise every tool that derives the tag from the
+installed version needs a mapping.
+
+The support covers that need and nothing more:
+- **Normalised spelling only.** `v1.0.0rc1` is accepted. The spellings PEP 440 normalises away stay invalid:
+  `v1.0.0-rc1`, `v1.0.0.rc1`, `v1.0.0RC1`, `v1.0.0c1`, `v1.0.0pre1`, `v1.0.0rc01`.
+- **`rc1` to `rc99`.** The range matches `RC1` to `RC99`. PEP 440 also allows `rc0`; it is left out.
+- **One release, two spellings.** `v1.0.0rcN` and `v1.0.0-RCn` normalise to the same release: they sort equal, the
+  increment rules treat them alike, and a tag in one spelling counts as present for the other. When the action finds
+  the tag in the other spelling, it logs the spelling it found.
+- **No other PEP 440 segments.** Alpha (`aN`), beta (`bN`), development (`.devN`), post-release (`.postN`) and local
+  (`+local`) versions are not supported.
+
 ### Version Weight Comparison
 
 #### Numeric Precedence
@@ -118,6 +137,7 @@ For the same numeric version (e.g. `v1.0.0`), qualifiers are ordered as follows:
    - `v1.0.0-SNAPSHOT` < `v1.0.0-ALPHA` < `v1.0.0-BETA`
    - `v1.0.0-BETA` < `v1.0.0-RC1` < `v1.0.0-RC2` < ... < `v1.0.0-RC99`
    - `v1.0.0-RC99` < `v1.0.0-RELEASE` < `v1.0.0`
+   - `v1.0.0rcN` sorts equal to `v1.0.0-RCn`, so `v1.0.0-RC1` < `v1.0.0rc2` < `v1.0.0-RC3`
 
 2. **Hotfix progression:**
    - `v1.0.0` < `v1.0.0-HF1` < `v1.0.0-HF2` < ... < `v1.0.0-HF99`

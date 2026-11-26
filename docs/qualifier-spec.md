@@ -17,6 +17,7 @@ Related issues:
 
 - [#5 – Add support for qualifiers and their validation](https://github.com/AbsaOSS/version-tag-check/issues/5)
 - [#38 – Spike: Integrate new version qualifier validation spec into repo documentation and workflow](https://github.com/AbsaOSS/version-tag-check/issues/38)
+- [#119 – Accept the PEP 440 release candidate tag `vX.Y.ZrcN`](https://github.com/AbsaOSS/version-tag-check/issues/119)
 
 ---
 
@@ -44,7 +45,7 @@ Versions may include a single, optional **qualifier** appended with a hyphen:
 
 Rules:
 
-- The hyphen `-` introduces the qualifier.
+- The hyphen `-` introduces the qualifier. The one exception is the PEP 440 release candidate (section 2.3).
 - At most **one** qualifier is allowed.
 - No additional segments after the qualifier are allowed.
 
@@ -60,11 +61,41 @@ Examples of **invalid shapes**:
 - `1.0.0-ALPHA.1`
 - `1.0.0-` (no qualifier after hyphen)
 
+### 2.3 PEP 440 release candidate
+
+A release candidate may also be written in the normalised spelling of
+[PEP 440](https://peps.python.org/pep-0440/):
+
+- `Major.Minor.PatchrcN`
+
+Rationale:
+
+- PEP 440 is the version standard of Python packaging. It normalises every pre-release to lowercase with no separator,
+  so a package versioned `0.9.0-RC1` is built, published and installed as `0.9.0rc1`. pip, PyPI, the wheel file name
+  and `importlib.metadata.version()` all show `0.9.0rc1`.
+- A repository whose tag is `v` plus its package version therefore cannot keep `-RC1`. Accepting the normalised
+  spelling lets it tag each release in the one spelling it publishes.
+
+Rules:
+
+- Only the normalised spelling is allowed: lowercase `rc`, no separator, no leading zero in `N`.
+- `N` is `1`–`99`, the range of `RCx` (section 3.4). PEP 440 also allows `rc0`; it is excluded.
+- `Major.Minor.PatchrcN` is the RC qualifier written another way, not a new qualifier. It normalises to
+  `Major.Minor.Patch-RCN`: the two spellings are one release, equal in precedence (section 4.2) and in presence
+  checks, so a release cannot be tagged in both.
+- No other PEP 440 segment is supported (section 7).
+
+Examples:
+
+- Valid: `0.9.0rc1`, `0.9.0rc2`, `0.9.0rc99`
+- Invalid: `0.9.0rc0`, `0.9.0rc100`, `0.9.0rc01`, `0.9.0rc`, `0.9.0-rc1`, `0.9.0.rc1`, `0.9.0_rc1`, `0.9.0RC1`,
+  `0.9.0c1`, `0.9.0pre1`, `0.9.0rc1-SNAPSHOT`
+
 ---
 
 ## 3. Allowed Qualifiers and Patterns
 
-Only the following qualifiers are allowed. Qualifiers are case-sensitive and must appear in **uppercase** exactly as described here.
+Only the following qualifiers are allowed. Qualifiers are case-sensitive and must appear in **uppercase** exactly as described here. The PEP 440 release candidate `rcN` (section 2.3) is the one lowercase spelling; it is the RC qualifier, not a separate one.
 
 ### 3.1 SNAPSHOT
 
@@ -106,6 +137,8 @@ Examples:
 
 - Valid: `1.0.0-RC1`, `1.0.0-RC2`, `1.0.0-RC10`
 - Invalid: `1.0.0-RC`, `1.0.0-RC001`, `1.0.0-Rc1`, `1.0.0-rc1`
+
+The same release candidate may be written `1.0.0rc1` (section 2.3).
 
 ### 3.5 RELEASE
 
@@ -164,6 +197,7 @@ Formally, for version `v = Major.Minor.Patch`:
 
 - `v-SNAPSHOT` < `v-ALPHA` < `v-BETA`
 - `v-BETA` < `v-RC1` < `v-RC2` < … < `v-RC99`
+- `vrcN` = `v-RCN` (section 2.3), so `v-RC1` < `vrc2` < `v-RC3`
 - Any `v-RC*` < `v-RELEASE`
 - `v-RELEASE` < `v`
 
@@ -197,7 +231,7 @@ For comparisons with the bare version:
 
 A tag is **valid** if:
 
-1. It matches the `Major.Minor.Patch` or `Major.Minor.Patch-QUALIFIER` structure, and
+1. It matches the `Major.Minor.Patch`, `Major.Minor.Patch-QUALIFIER` or `Major.Minor.PatchrcN` (section 2.3) structure, and
 2. If a qualifier is present, it matches one of the allowed patterns defined in this spec.
 
 ### 5.2 Invalid qualifiers
@@ -208,6 +242,8 @@ A tag is **invalid** if:
 - The qualifier uses incorrect casing (e.g. `alpha`, `Rc1`).
 - The qualifier pattern is malformed (e.g. `RC`, `RC001`, `HF001`).
 - Multiple qualifiers or additional segments are present (e.g. `1.0.0-RC1-SNAPSHOT`).
+- A release candidate uses a PEP 440 spelling other than the normalised `rcN`, or `rc0` (e.g. `1.0.0-rc1`,
+  `1.0.0.rc1`, `1.0.0RC1`, `1.0.0c1`, `1.0.0rc0`).
 
 Invalid tags should be rejected with clear error messages indicating:
 
@@ -257,6 +293,14 @@ Examples assuming strictly increasing order:
   - `1.0.1-HF1`
   - `1.0.1-HF2`
 
+- With PEP 440 release candidates, alone or mixed with `-RCx`:
+
+  - `0.8.1`
+  - `0.9.0rc1`
+  - `0.9.0-RC2`
+  - `0.9.0rc3`
+  - `0.9.0`
+
 ### 6.2 Examples of invalid sequences
 
 - Backwards in qualifier precedence:
@@ -279,6 +323,11 @@ Examples assuming strictly increasing order:
   - `1.0.0`
   - `1.0.0-RELEASE` (invalid: `1.0.0-RELEASE` < `1.0.0`)
 
+- The same release candidate in the other spelling:
+
+  - `0.9.0-RC1`
+  - `0.9.0rc1` (invalid: `0.9.0rc1` = `0.9.0-RC1`)
+
 ---
 
 ## 7. Non-Goals / Exclusions
@@ -290,6 +339,9 @@ The following are explicitly **out of scope**:
 - Pre-release or build metadata segments (e.g. `1.0.0-RC1+build.123`, `1.0.0-ALPHA.1`).
 - Multi-part numeric qualifiers (e.g. `RC1.1`, `HF1.2`).
 - Changing semantics for versions **without** qualifiers (`Major.Minor.Patch`).
+- PEP 440 beyond the release candidate of section 2.3: alpha (`aN`), beta (`bN`), development (`.devN`),
+  post-release (`.postN`) and local (`+local`) segments, and the spellings PEP 440 normalises away (`-rc1`, `.rc1`,
+  `c1`, `pre1`, uppercase).
 
 ---
 
