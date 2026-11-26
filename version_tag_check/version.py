@@ -205,16 +205,16 @@ class Version:  # pylint: disable=too-many-instance-attributes
         # Invalid qualifier - return lowest precedence
         return (-1, 0)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Compare the Version to another Version.
 
         Versions compare in normalised form, so "vX.Y.ZrcN" equals "vX.Y.Z-RCn".
 
         @param other: The other Version to compare to
-        @return: True if the Versions are equal, False otherwise
+        @return: True if the Versions are equal, False otherwise, also when other is not a Version
         """
-        if other is None:
+        if not isinstance(other, Version):
             return False
 
         if not self.is_valid_format() or not other.is_valid_format():
@@ -227,7 +227,7 @@ class Version:  # pylint: disable=too-many-instance-attributes
         # If numeric components are equal, compare qualifiers
         return self.get_qualifier_precedence() == other.get_qualifier_precedence()
 
-    def __lt__(self, other) -> Optional[bool]:
+    def __lt__(self, other: Optional["Version"]) -> bool:
         """
         Compare the Version to another Version.
 
@@ -247,7 +247,7 @@ class Version:  # pylint: disable=too-many-instance-attributes
         # If numeric components are equal, compare qualifiers
         return self.get_qualifier_precedence() < other.get_qualifier_precedence()
 
-    def __gt__(self, other):
+    def __gt__(self, other: Optional["Version"]) -> bool:
         """
         Compare the Version to another Version.
 

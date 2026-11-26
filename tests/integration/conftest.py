@@ -10,7 +10,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 @pytest.fixture
-def subprocess_env_with_mocked_github(tmp_path):
+def subprocess_env_with_mocked_github(tmp_path: Path) -> dict[str, str]:
     """Create a subprocess environment with mocked GitHubRepository.
 
     This fixture prepares:

@@ -19,7 +19,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 @pytest.mark.integration
-def test_local_run_successful_new_version(subprocess_env_with_mocked_github):
+def test_local_run_successful_new_version(subprocess_env_with_mocked_github: dict[str, str]) -> None:
     """Run main.py as a subprocess and expect success for a valid new version.
 
     Scenario: New tag v0.1.1 is a valid patch increment on top of existing
@@ -50,7 +50,7 @@ def test_local_run_successful_new_version(subprocess_env_with_mocked_github):
 
 
 @pytest.mark.integration
-def test_local_run_fails_on_existing_tag(subprocess_env_with_mocked_github):
+def test_local_run_fails_on_existing_tag(subprocess_env_with_mocked_github: dict[str, str]) -> None:
     """Run main.py as a subprocess and expect failure when tag already exists.
 
     Scenario: New tag v0.1.0 already exists in the list returned by

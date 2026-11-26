@@ -14,19 +14,23 @@
 # limitations under the License.
 #
 
+import os
+from collections.abc import Iterator
+
 import pytest
+from pytest_mock import MockerFixture, MockType
+
+
+@pytest.fixture(autouse=True)
+def clean_action_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Fixture to start every unit test without RUNNER_DEBUG or any INPUT_* action input, whatever the runner sets."""
+    monkeypatch.delenv("RUNNER_DEBUG", raising=False)
+    for name in [name for name in os.environ if name.startswith("INPUT_")]:
+        monkeypatch.delenv(name)
 
 
 @pytest.fixture
-def mock_logging_setup(mocker):
+def mock_logging_setup(mocker: MockerFixture) -> Iterator[MockType]:
     """Fixture to mock the basic logging setup using pytest-mock."""
     mock_log_config = mocker.patch("logging.basicConfig")
     yield mock_log_config
-
-
-@pytest.fixture()
-def mock_exit(code) -> list:
-    """Fixture to mock the sys.exit function using pytest-mock."""
-    exit_calls = []
-    exit_calls.append(code)
-    return exit_calls

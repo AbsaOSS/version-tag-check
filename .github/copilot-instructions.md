@@ -18,22 +18,23 @@ Coding guidelines
 Python and style
 - Target Python 3.11 or later
 - Follow the current patterns in version_tag_check
-- Add type hints for new public functions and classes
+- Type every function and method: parameter types and a return type; mypy fails on a missing hint
 - Use logging, not print, and keep logging wired through version_tag_check.utils.logging_config
 
 Testing
 - Use pytest with tests located in tests/
 - Test behaviour: return values, raised errors, log messages, exit codes
 - When touching version parsing or increment rules, extend tests in:
-	tests/test_version.py
-	tests/test_version_validator.py
-	tests/test_version_tag_check_action.py
+	tests/unit/test_version.py
+	tests/unit/test_version_validator.py
+	tests/unit/test_version_tag_check_action.py
+- Type every test function, fixture and helper: parameter types and a return type (`-> None` for a test); mypy checks tests/ and fails on a missing hint
 - Mock GitHubRepository and environment variables; do not call the real GitHub API in unit tests
 
 Tooling
 - Format with Black using pyproject.toml
 - Run Pylint on tracked Python files, excluding tests/, and aim for score 9.5 or higher
-- Run mypy and prefer fixing types instead of ignoring errors
+- Run mypy over the whole repository, tests/ included, and prefer fixing types instead of ignoring errors
 - Use pytest-cov and keep coverage at or above 80 percent
 
 Architecture notes
